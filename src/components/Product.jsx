@@ -1,0 +1,238 @@
+import React, { useState, useEffect, useRef } from "react";
+import Iframe from "./Iframe";
+import { useGlobalContext } from "./context/ProductContext";
+
+const Product = () => {
+  const  productsData = useGlobalContext();
+  const [products, setProducts] = useState([]);
+  const [formData, setFormData] = useState({
+    styleNumber: "",
+    size: "",
+    quantity: 1,
+  });
+  
+
+
+
+   const fetchMached = productsData.productsData.find((p)=>p.style_code==formData.styleNumber);
+   
+   
+
+
+
+
+
+  const [editingIndex, setEditingIndex] = useState(null); // Track which product is being edited
+  const styleNumberRef = useRef(null);
+
+  useEffect(() => {
+    styleNumberRef.current.focus();
+    const savedProducts = localStorage.getItem("products");
+    if (savedProducts) {
+      setProducts(JSON.parse(savedProducts));
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newProduct = {
+      styleNumber: formData.styleNumber.trim(),
+      size: formData.size.trim(),
+      quantity: parseInt(formData.quantity) || 0,
+      dateAdded: new Date().toISOString(),
+    };
+
+    let updatedProducts;
+    if (editingIndex !== null) {
+      // Update existing product
+      updatedProducts = [...products];
+      updatedProducts[editingIndex] = newProduct;
+      setEditingIndex(null); // Reset editing state
+    } else {
+      // Add new product
+      updatedProducts = [newProduct, ...products];
+    }
+
+    localStorage.setItem("products", JSON.stringify(updatedProducts));
+    setProducts(updatedProducts);
+
+    setFormData({ styleNumber: "", size: "", quantity: 1 });
+    styleNumberRef.current.focus();
+  };
+
+  const handleEdit = (index) => {
+    const productToEdit = products[index];
+    setFormData({
+      styleNumber: productToEdit.styleNumber,
+      size: productToEdit.size,
+      quantity: productToEdit.quantity.toString()
+    });
+    setEditingIndex(index); // Set which product we're editing
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    styleNumberRef.current.focus();
+  };
+  
+  const handleDelete = (index) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      const updatedProducts = products.filter((_, i) => i !== index);
+      setProducts(updatedProducts);
+      localStorage.setItem('products', JSON.stringify(updatedProducts));
+      // If we're deleting the product being edited, reset the form
+      if (editingIndex === index) {
+        setFormData({ styleNumber: "", size: "", quantity: 1 });
+        setEditingIndex(null);
+      }
+    }
+  };
+
+  return (
+    <div className="max-w-4xl p-6 bg-white rounded-lg">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        {editingIndex !== null ? "Edit Product" : "Add New Product"}
+      </h2>
+
+      <div className={`  absolute -right-44 top-4 overflow-hidden`}>
+      <Iframe style_id={fetchMached?.style_id}/>
+      </div>
+      
+
+      <form onSubmit={handleSubmit}>
+        <div className="flex  flex-col gap-4">
+          {/* Style Number */}
+          <div className="flex-1">
+            <label
+              htmlFor="styleNumber"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Style Number *
+            </label>
+            <input
+              ref={styleNumberRef}
+              type="text"
+              id="styleNumber"
+              name="styleNumber"
+              value={formData.styleNumber}
+              onChange={handleChange}
+              required
+              className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Style #"
+            />
+          </div>
+
+          {/* Size */}
+          <div className="flex-1">
+            <label
+              htmlFor="size"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Size
+            </label>
+            <select
+              id="size"
+              name="size"
+              value={formData.size}
+              required
+              onChange={handleChange}
+              className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            >
+              <option value="">Select Size</option>
+              <option value="XXS">XXS</option>
+              <option value="XS">XS</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="2XL">2XL</option>
+              <option value="3XL">3XL</option>
+              <option value="4XL">4XL</option>
+              <option value="5XL">5XL</option>
+            </select>
+          </div>
+
+          {/* Quantity */}
+          <div className="flex-1">
+            <label
+              htmlFor="quantity"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Quantity *
+            </label>
+            <input
+              type="number"
+              id="quantity"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              required
+              min="1"
+              className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Qty"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex-1">
+            <button
+              type="submit"
+              className="w-full  bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
+            >
+              {editingIndex !== null ? "Update" : "Add"}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      
+      
+      <hr className="my-4 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent border-0" />
+
+      {/* Saved Products List */}
+      {products.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Saved Products</h3>
+          <div className="space-y-2">
+            {products.map((product, index) => (
+              <div
+                key={index}
+                className={`flex items-center gap-4 p-3 rounded-md hover:bg-gray-100 transition-colors ${
+                  editingIndex === index ? "bg-blue-50" : "bg-gray-50"
+                }`}
+              >
+                <div className="flex-1 font-medium">{product.styleNumber}</div>
+                <div className="flex-1">{product.size}</div>
+                <div className="flex-1">{product.quantity}</div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(index)}
+                    className="p-2 text-blue-600 hover:text-blue-800 transition-colors"
+                    title="Edit"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(index)}
+                    className="p-2 text-red-600 hover:text-red-800 transition-colors"
+                    title="Delete"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Product;
