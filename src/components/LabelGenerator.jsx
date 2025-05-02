@@ -65,8 +65,7 @@ const LabelGenerator = () => {
         label.style.height = "50mm";
         label.style.display = "flex";
         label.style.flexDirection = "column";
-        label.style.justifyContent = "space-between";
-        label.style.alignItems = "center";
+        // label.style.justifyContent = "space-between";
         label.style.fontFamily = "Arial";
         label.style.fontSize = "10px";
         label.style.padding = "4mm";
@@ -79,10 +78,11 @@ const LabelGenerator = () => {
           <div>Brand: ${product.brand}</div>
           <div>Color: ${product.color} | Size: ${product.size}</div>
           <div>MRP: ₹${product.mrp} | Unit: ${product.unit}</div>
+          <div>${product.customText}</div>
           
 
         `;
-        topText.style.textAlign = "center";
+        topText.style.textAlign = "left";
 
         const canvas = document.createElement("canvas");
         JsBarcode(canvas, product.sku, {
@@ -91,12 +91,13 @@ const LabelGenerator = () => {
           height: 30,
           displayValue: true,
         });
+        canvas.style.marginTop="10px";
 
         const bottomText = document.createElement("div");
-        bottomText.innerText = product.customText;
-        bottomText.style.fontSize = "8px";
-        bottomText.style.textAlign = "center";
-        bottomText.style.marginTop = "2mm";
+        // bottomText.innerText = product.customText;
+        // bottomText.style.fontSize = "8px";
+        // bottomText.style.textAlign = "center";
+        // bottomText.style.marginTop = "2mm";
 
         label.appendChild(topText);
         label.appendChild(canvas);

@@ -82,8 +82,8 @@ const exportToPDF = async () => {
         barcodeDiv.style.boxSizing = "border-box";
         barcodeDiv.style.display = "flex";
         barcodeDiv.style.flexDirection = "column";
-        barcodeDiv.style.justifyContent = "center";
-        barcodeDiv.style.alignItems = "center";
+    
+        
         barcodeDiv.style.background = "white";
 
         const canvas = document.createElement("canvas");
