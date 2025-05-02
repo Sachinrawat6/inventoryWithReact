@@ -19,7 +19,7 @@ const downloadMrpLable = (data)=>{
           // Ensure all required fields exist with fallbacks
           return [
             '50 mm x 25 mm on Roll - PDF', // DropshipWarehouseId
-            `${product.styleNumber}-${matched.color}-${product.size}` || 'MISSING_SKU', // Item SkuCode
+            `${product.styleNumber}-${product.size}` , // Item SkuCode
             matched.style_name,
             'Qurvii',
             matched.color,

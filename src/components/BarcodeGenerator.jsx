@@ -91,7 +91,7 @@ const exportToPDF = async () => {
           format: "CODE128",
           width: 2,
           height: 40,
-          displayValue: false,
+          displayValue: true,
           margin: 0,
         });
 
@@ -108,7 +108,7 @@ const exportToPDF = async () => {
         tempContainer.appendChild(barcodeDiv);
 
         const canvasImage = await html2canvas(barcodeDiv, {
-          scale: 3,
+          scale: 1,
           useCORS: true,
           backgroundColor: "#ffffff",
         });
