@@ -96,7 +96,7 @@ const exportToPDF = async () => {
         });
 
         const label = document.createElement("div");
-        label.innerHTML = `${product.sku}<br/>${product.name}`;
+        label.innerHTML = `${product.name}`;
         label.style.marginTop = "4mm";
         label.style.fontFamily = "Helvetica, Arial, sans-serif";
         label.style.fontSize = "12px";

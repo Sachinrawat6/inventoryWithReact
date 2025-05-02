@@ -79,7 +79,7 @@ const LabelGenerator = () => {
           <div>Brand: ${product.brand}</div>
           <div>Color: ${product.color} | Size: ${product.size}</div>
           <div>MRP: ₹${product.mrp} | Unit: ${product.unit}</div>
-          <div>SKU: ${product.sku}</div>
+          
 
         `;
         topText.style.textAlign = "center";
@@ -89,7 +89,7 @@ const LabelGenerator = () => {
           format: "CODE128",
           width: 2,
           height: 30,
-          displayValue: false,
+          displayValue: true,
         });
 
         const bottomText = document.createElement("div");
