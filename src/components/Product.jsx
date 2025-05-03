@@ -151,12 +151,12 @@ const Product = () => {
         {editingIndex !== null ? "Edit Product" : "Add New Product"}
       </h2>
 
-      <div className={`  absolute -right-44 top-4 overflow-hidden`}>
+      <div className={`  absolute right-4 -top-37 overflow-hidden xl:w-auto lg:w-115 md:w-115`}>
         <Iframe style_id={fetchMached?.style_id} />
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="flex  flex-col gap-4">
+        <div className="flex  md:w-85 lg:w-100 xl:w-full xs:w-90  flex-col gap-4">
           {/* Style Number */}
           <div className="flex-1">
           <div className="flex justify-end">
@@ -255,7 +255,7 @@ const Product = () => {
           <h3 className="text-lg font-semibold text-gray-800 mb-3">
             Saved Products
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-2 lg:w-100 xl:w-full md:w-90">
             {products.map((product, index) => (
               <div
                 key={index}

@@ -9,7 +9,7 @@ const Iframe = ({style_id}) => {
     <div className={`${style_id?"block":"hidden"}`}  >
 
     <iframe 
-    className='w-[700px] h-180 scale-[1.6] pl-25 '
+    className='lg:w-[800px] md:w-[500px] h-250  pl-25 '
     src={`https://www.myntra.com/shirts/qurvii/qurvii-comfort-printed-mandarin-collar-longline-casual-shirt/${style_id}/buy`}></iframe>
 
     </div>
