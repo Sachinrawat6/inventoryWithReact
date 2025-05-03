@@ -23,7 +23,7 @@ const downloadStock = (data) => {
           'ADD', // InventoryAction
           '', // QtyIncludesBlocked (empty)
           product.quantity || 0, // Qty
-          matched.rack_space, // RackSpace (quoted)
+          product.rackSpace, // RackSpace (quoted)
           '', // Last Purchase Price (empty)
           '' // Notes (empty)
         ].join(',');

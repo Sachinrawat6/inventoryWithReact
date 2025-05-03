@@ -77,7 +77,7 @@ const exportToPDF = async () => {
         const barcodeDiv = document.createElement("div");
         barcodeDiv.style.width = "100mm";
         barcodeDiv.style.height = "50mm";
-        barcodeDiv.style.padding = "0";
+        barcodeDiv.style.padding = "5mm";
         barcodeDiv.style.margin = "0";
         barcodeDiv.style.boxSizing = "border-box";
         barcodeDiv.style.display = "flex";
