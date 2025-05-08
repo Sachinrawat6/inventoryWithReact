@@ -96,7 +96,7 @@ const exportToPDF = async () => {
         });
 
         const label = document.createElement("div");
-        label.innerHTML = `<b> (${product.rackSpace}) ${product.sku} </b>`;
+        label.innerHTML = `<b> (${product.rackSpace}) ${product.sku.split("-")[0]}-${product.name}-${product.sku.split("-")[1]} </b>`;
         label.style.marginTop = "4mm";
         label.style.fontFamily = "Helvetica, Arial, sans-serif";
         label.style.fontSize = "22px";
@@ -174,7 +174,7 @@ const generatePreview = async () => {
     });
 
     const label = document.createElement("div");
-    label.innerHTML = `<b> (${product.rackSpace}) ${product.sku} </b> <br> ${product.name}`;
+    label.innerHTML = `<b> (${product.rackSpace}) ${product.sku.split("-")[0]}-${product.name}-${product.sku.split("-")[1]} </b>`;
     label.style.marginTop = "4mm";
     label.style.fontFamily = "Helvetica, Arial, sans-serif";
     label.style.fontSize = "12px";
@@ -269,8 +269,8 @@ const generatePreview = async () => {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="p-3 text-left">SKU</th>
-                  <th className="p-3 text-left">Product</th>
-                  <th className="p-3 text-left">Labels</th>
+                  <th className="p-3 text-left">Color</th>
+                  <th className="p-3 text-left">Quantity</th>
                 </tr>
               </thead>
               <tbody>
