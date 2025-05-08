@@ -20,13 +20,13 @@ const downloadMrpLable = (data)=>{
           return [
             '50 mm x 25 mm on Roll - PDF', // DropshipWarehouseId
             `${product.styleNumber}-${product.size}` , // Item SkuCode
-            matched.style_name,
+            matched?.style_name || "Qurvii Product",
             'Qurvii',
-            matched.color,
-            product.size,
+            matched?.color || "Other",
+            product?.size,
             '1 Pcs',
-            matched.mrp,
-            product.quantity || 0, // Qty
+            matched?.mrp || 4360,
+            product?.quantity || 0, // Qty
             custome_Text
           ].join(',');
         });

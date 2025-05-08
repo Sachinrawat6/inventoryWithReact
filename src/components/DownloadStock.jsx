@@ -19,11 +19,11 @@ const downloadStock = (data) => {
         // Ensure all required fields exist with fallbacks
         return [
           '22784', // DropshipWarehouseId
-          `${product.styleNumber}-${matched.color}-${product.size}` || 'MISSING_SKU', // Item SkuCode
+          `${product.styleNumber}-${matched?.color || "other"}-${product.size}` || 'MISSING_SKU', // Item SkuCode
           'ADD', // InventoryAction
           '', // QtyIncludesBlocked (empty)
           product.quantity || 0, // Qty
-          product.rackSpace, // RackSpace (quoted)
+          product?.rackSpace, // RackSpace (quoted)
           '', // Last Purchase Price (empty)
           '' // Notes (empty)
         ].join(',');
