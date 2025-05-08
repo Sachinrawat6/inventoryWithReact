@@ -20,8 +20,8 @@ const downloadBarcodes = (data)=>{
           // Ensure all required fields exist with fallbacks
           return [
             `${product.styleNumber}-${product.size}`,
-            `(${matched.rack_space}) ${matched.style_name}`,
-            `1 label 50mm x 25 mm on Roll - PDF`,
+            `(${matched.rack_space})`,
+            `${matched.color}`,
             product.quantity
           ].join(',');
         });
