@@ -151,7 +151,7 @@ const Product = () => {
         {editingIndex !== null ? "Edit Product" : "Add New Product"}
       </h2>
 
-      <div className={`  absolute right-4 -top-37 overflow-hidden 2xl:w-auto xl:w-115 lg:w-115 md:w-115`}>
+      <div className={`  absolute right-4 -top-37 overflow-hidden 2xl:w-auto xl:w-200 lg:w-115 md:w-115`}>
         <Iframe style_id={fetchMached?.style_id} />
       </div>
 

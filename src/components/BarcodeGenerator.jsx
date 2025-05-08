@@ -8,7 +8,7 @@ import { FaBarcode } from "react-icons/fa";
 const formatProductInfo = (product) => {
   return `
     <div>
-      <strong>${product.sku}</strong><br/>
+      <strong>${product.name.split(" ")[0]}  ${product.sku}</strong><br/>
       ${product.name}
     </div>
   `;
@@ -43,7 +43,7 @@ const BarcodeGenerator = () => {
         return {
           sku: columns[0]?.trim(),
           name: columns[1]?.trim(),
-          labelType: columns[2]?.trim(),
+          rackSpace: columns[2]?.trim(),
           quantity: parseInt(columns[3]) || 1, // Ensure it's a number
         };
       })
@@ -91,15 +91,16 @@ const exportToPDF = async () => {
           format: "CODE128",
           width: 2,
           height: 40,
-          displayValue: true,
+          displayValue: false,
           margin: 0,
         });
 
         const label = document.createElement("div");
-        label.innerHTML = `${product.name}`;
+        label.innerHTML = `<b> (${product.rackSpace}) ${product.sku} </b>`;
         label.style.marginTop = "4mm";
         label.style.fontFamily = "Helvetica, Arial, sans-serif";
-        label.style.fontSize = "12px";
+        label.style.fontSize = "22px";
+        label.style.font = "bold";
         label.style.textAlign = "center";
         label.style.lineHeight = "1.4";
 
@@ -173,7 +174,7 @@ const generatePreview = async () => {
     });
 
     const label = document.createElement("div");
-    label.innerHTML = `${product.sku}<br/>${product.name}`;
+    label.innerHTML = `<b> (${product.rackSpace}) ${product.sku} </b> <br> ${product.name}`;
     label.style.marginTop = "4mm";
     label.style.fontFamily = "Helvetica, Arial, sans-serif";
     label.style.fontSize = "12px";

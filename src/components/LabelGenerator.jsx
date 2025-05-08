@@ -6,6 +6,7 @@ import { FaBarcode, FaTag } from "react-icons/fa";
 
 const LabelGenerator = () => {
   const [products, setProducts] = useState([]);
+  // const [isGenerating,setIsGenerating] = useState(false);
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -53,6 +54,8 @@ const LabelGenerator = () => {
       format: [100, 50],
     });
 
+    
+
     const container = document.createElement("div");
     container.style.position = "absolute";
     container.style.left = "-9999px";
@@ -65,7 +68,6 @@ const LabelGenerator = () => {
         label.style.height = "50mm";
         label.style.display = "flex";
         label.style.flexDirection = "column";
-        // label.style.justifyContent = "space-between";
         label.style.fontFamily = "Arial";
         label.style.fontSize = "10px";
         label.style.padding = "4mm";
@@ -79,6 +81,7 @@ const LabelGenerator = () => {
           <div>Color: ${product.color} | Size: ${product.size}</div>
           <div>MRP: ₹${product.mrp} | Unit: ${product.unit}</div>
           <div>${product.customText}</div>
+          <div> <b>Seller sku: ${product.sku} </b></div>
           
 
         `;
@@ -89,16 +92,11 @@ const LabelGenerator = () => {
           format: "CODE128",
           width: 2,
           height: 30,
-          displayValue: true,
+          displayValue: false,
         });
-        canvas.style.marginTop="10px";
+        canvas.style.marginTop="4px";
 
         const bottomText = document.createElement("div");
-        // bottomText.innerText = product.customText;
-        // bottomText.style.fontSize = "8px";
-        // bottomText.style.textAlign = "center";
-        // bottomText.style.marginTop = "2mm";
-
         label.appendChild(topText);
         label.appendChild(canvas);
         label.appendChild(bottomText);
@@ -119,6 +117,8 @@ const LabelGenerator = () => {
     document.body.removeChild(container);
     pdf.save("labels.pdf");
   };
+
+  
 
   return (
    <div className="container mx-auto p-6 max-w-4xl">
@@ -146,7 +146,7 @@ const LabelGenerator = () => {
           onClick={exportToPDF}
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
-          Download Labels
+         Download Labels
         </button>
       )}
     </div>

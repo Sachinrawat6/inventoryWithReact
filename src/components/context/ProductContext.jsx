@@ -16,8 +16,6 @@ useEffect(()=>{
     fetchProducts();
 },[])
 
- 
-
   return (
     <ProductContext.Provider value={{ productsData }}>
       {children}

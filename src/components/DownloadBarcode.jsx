@@ -11,7 +11,7 @@ const downloadBarcodes = (data)=>{
         }
     
         // 2. Prepare CSV header
-        const headers =  "Barcode,Title,Label Type,Qty\n";
+        const headers =  "Barcode,Title,RackSpace,Qty\n";
         
         // 3. Process ALL products into CSV rows
         const csvRows = products.map(product => {
@@ -20,8 +20,8 @@ const downloadBarcodes = (data)=>{
           // Ensure all required fields exist with fallbacks
           return [
             `${product.styleNumber}-${product.size}`,
-            `(${product.rackSpace}) ${matched.style_name}`,
-            '1 label 50mm x 25 mm on Roll - PDF',
+            `${matched.style_name}`,
+            `${product.rackSpace}`,
             product.quantity
           ].join(',');
         });
