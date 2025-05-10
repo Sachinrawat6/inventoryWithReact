@@ -15,7 +15,9 @@ const Product = () => {
     (p) => p.style_code == formData.styleNumber
   );
 
-  // finding valid rackSpace
+
+// finding valid rackSpace
+  
   function getValidRackSpace(startStyleNumber, productsData) {
     const original = parseInt(startStyleNumber);
   
@@ -28,8 +30,11 @@ const Product = () => {
     const getCleanRackSpace = (rackSpace) =>
       rackSpace?.replace(/['"]/g, "").trim().toUpperCase();
   
-    const isValidRack = (rackSpace) =>
-      rackSpace && getCleanRackSpace(rackSpace) !== "DEFAULT";
+    // Consider blank or 'DEFAULT' rack as invalid
+    const isValidRack = (rackSpace) => {
+      const cleaned = getCleanRackSpace(rackSpace);
+      return cleaned && cleaned !== "DEFAULT";
+    };
   
     // Step 2: Check current style's rack space
     const current = styleMap.get(String(original));
@@ -37,8 +42,8 @@ const Product = () => {
   
     const currentRack = getCleanRackSpace(current.rack_space);
   
-    // Only proceed if style number is 5 digits and rack is DEFAULT
-    if (String(original).length === 5 && currentRack === "DEFAULT") {
+    // Only proceed if style number is 5 digits and rack is invalid
+    if (String(original).length === 5 && !isValidRack(current.rack_space)) {
       // Step 3: Try +1 to +100
       for (let i = 1; i <= 100; i++) {
         const next = styleMap.get(String(original + i));
@@ -62,13 +67,24 @@ const Product = () => {
       return null;
     }
   
-    // If not DEFAULT or styleNumber is not 5 digits, return current (if valid)
+    // If current rack is valid
     if (isValidRack(current.rack_space)) {
       return { rackSpace: current.rack_space, styleNumber: original };
     }
   
     return null;
   }
+  
+
+
+
+
+
+
+
+
+
+
   
   const [editingIndex, setEditingIndex] = useState(null); // Track which product is being edited
   const styleNumberRef = useRef(null);
