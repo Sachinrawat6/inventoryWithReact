@@ -4,6 +4,8 @@ import JsBarcode from "jsbarcode";
 import html2canvas from "html2canvas";
 import { FaBarcode } from "react-icons/fa";
 
+
+
 const BarcodeGenerator = () => {
   const [products, setProducts] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -41,47 +43,43 @@ const BarcodeGenerator = () => {
   };
 
   const createBarcodeImage = async (product) => {
-    const container = document.createElement("div");
-    container.style.width = "100mm";
-    container.style.height = "50mm";
-    container.style.padding = "5mm";
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    container.style.alignItems = "center";
-    container.style.justifyContent = "center";
-    container.style.background = "white";
-
+    // 100mm x 50mm at 300 DPI = 1181 x 591 px
+    const widthPx = 1181;
+    const heightPx = 591;
+  
     const canvas = document.createElement("canvas");
-    JsBarcode(canvas, product.sku, {
+    canvas.width = widthPx;
+    canvas.height = heightPx;
+  
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, widthPx, heightPx);
+  
+    // Create a new offscreen canvas for JsBarcode
+    const barcodeCanvas = document.createElement("canvas");
+    JsBarcode(barcodeCanvas, product.sku, {
       format: "CODE128",
-      width: 2,
-      height: 40,
+      width: 6,
+      height: 200,
       displayValue: false,
       margin: 0,
     });
-
-    const label = document.createElement("div");
-    label.innerHTML = `<b> ${product.rackSpace} ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]} </b>`;
-    label.style.marginTop = "4mm";
-    label.style.fontFamily = "Helvetica, Arial, sans-serif";
-    label.style.fontSize = "16px";
-    label.style.textAlign = "center";
-    label.style.lineHeight = "1.4";
-
-    container.appendChild(canvas);
-    container.appendChild(label);
-    document.body.appendChild(container);
-
-    const image = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    });
-
-    document.body.removeChild(container);
-    return image.toDataURL("image/png");
+  
+    // Draw barcode in the center horizontally
+    const barcodeX = (widthPx - barcodeCanvas.width) / 2;
+    const barcodeY = 150;
+    ctx.drawImage(barcodeCanvas, barcodeX, barcodeY);
+  
+    // Add text label at the bottom
+    ctx.fillStyle = "black";
+    ctx.font = "60px Arial";
+    ctx.textAlign = "center";
+    const label = `${product.rackSpace} ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]}`;
+    ctx.fillText(label, widthPx / 2, heightPx - 150);
+  
+    return canvas.toDataURL("image/png");
   };
-
+  
   const exportToPDF = async () => {
     if (products.length === 0) return;
 
@@ -148,7 +146,7 @@ const BarcodeGenerator = () => {
 
 
   if(isGenerating){
-    return <p className="text-center text-xl mt-60"> Generating Barcode.... </p>
+    return <p className="text-center text-xl mt-60 animate-pulse"> Generating Barcode.... </p>
   }
 
   return (
