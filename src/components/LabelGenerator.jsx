@@ -6,7 +6,7 @@ import { FaBarcode, FaTag } from "react-icons/fa";
 
 const LabelGenerator = () => {
   const [products, setProducts] = useState([]);
-  // const [isGenerating,setIsGenerating] = useState(false);
+  const [isGenerating,setIsGenerating] = useState(false);
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -47,77 +47,85 @@ const LabelGenerator = () => {
   };
   
 
+  // exporting label 
+
   const exportToPDF = async () => {
+    
+    try{
+      setIsGenerating(true)
+    
     const pdf = new jsPDF({
       orientation: "landscape",
       unit: "mm",
       format: [100, 50],
     });
-
-    
-
-    const container = document.createElement("div");
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
-    document.body.appendChild(container);
-
+  
+    const barcodeCache = new Map();
+  
+    const generateBarcodeImage = (sku) => {
+      if (barcodeCache.has(sku)) return barcodeCache.get(sku);
+  
+      const canvas = document.createElement("canvas");
+      JsBarcode(canvas, sku, {
+        format: "CODE128",
+        width: 2,
+        height: 30,
+        displayValue: false,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+      barcodeCache.set(sku, dataUrl);
+      return dataUrl;
+    };
+  
+    let isFirstPage = true;
+  
     for (const product of products) {
+      const barcodeImg = generateBarcodeImage(product.sku);
+  
       for (let i = 0; i < product.quantity; i++) {
-        const label = document.createElement("div");
-        label.style.width = "100mm";
-        label.style.height = "50mm";
-        label.style.display = "flex";
-        label.style.flexDirection = "column";
-        label.style.fontFamily = "Arial";
-        label.style.fontSize = "10px";
-        label.style.padding = "4mm";
-        label.style.backgroundColor = "white";
-        label.style.boxSizing = "border-box";
-
-        const topText = document.createElement("div");
-        topText.innerHTML = `
-          <div><strong>${product.name}</strong></div>
-          <div>Brand: ${product.brand}</div>
-          <div>Color: ${product.color} | Size: ${product.size}</div>
-          <div>MRP: ₹${product.mrp} | Unit: ${product.unit}</div>
-          <div>${product.customText}</div>
-          <div> <b>Seller sku: ${product.sku} </b></div>
-          
-
-        `;
-        topText.style.textAlign = "left";
-
-        const canvas = document.createElement("canvas");
-        JsBarcode(canvas, product.sku, {
-          format: "CODE128",
-          width: 2,
-          height: 30,
-          displayValue: false,
-        });
-        canvas.style.marginTop="4px";
-
-        const bottomText = document.createElement("div");
-        label.appendChild(topText);
-        label.appendChild(canvas);
-        label.appendChild(bottomText);
-        container.appendChild(label);
-
-        const canvasImage = await html2canvas(label, { scale: 3 });
-        const imgData = canvasImage.toDataURL("image/png");
-
-        if (!(product === products[0] && i === 0)) {
-          pdf.addPage([100, 50], "landscape");
+        if (!isFirstPage) pdf.addPage();
+        isFirstPage = false;
+  
+        let y = 10; // Initial Y position
+  
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "bold");
+  
+        const nameLines = pdf.splitTextToSize(product.name, 90);
+        pdf.text(nameLines, 4, y);
+        y += nameLines.length * 5;
+  
+        pdf.setFont("helvetica", "normal");
+        pdf.text(`Brand: ${product.brand}`, 4, y);
+        y += 5;
+        pdf.text(`Color: ${product.color} | Size: ${product.size} `, 4, y) ;
+        y += 5;
+        pdf.text(`MRP: ₹${product.mrp} | Unit: ${product.unit}`, 4, y);
+        y += 5;
+  
+        if (product.customText) {
+          const customLines = pdf.splitTextToSize(product.customText, 90);
+          pdf.text(customLines, 4, y);
+          y += customLines.length * 5;
         }
-
-        pdf.addImage(imgData, "PNG", 0, 0, 100, 50);
-        container.removeChild(label);
+  
+        const skuText = `Seller SKU: ${product.sku}`;
+        const skuLines = pdf.splitTextToSize(skuText, 90);
+        pdf.text(skuLines, 4, y);
+        y += skuLines.length * 5;
+  
+        // Leave space and add barcode
+        pdf.addImage(barcodeImg, "PNG", 60, 36, 35, 15);
       }
     }
-
-    document.body.removeChild(container);
+  
     pdf.save("labels.pdf");
+  }catch(err){
+    console.log("Failed to generate labels",err);
+  }finally{
+    setIsGenerating(false)
+  }
   };
-
   
 
   return (
@@ -126,7 +134,7 @@ const LabelGenerator = () => {
            <span className="text-blue-400">
              <FaTag />
            </span>
-           Label Generator
+           Label Generator 
          </h1>
    
          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -146,7 +154,7 @@ const LabelGenerator = () => {
           onClick={exportToPDF}
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
-         Download Labels
+          {isGenerating?"Generating...":"Download Lables"}
         </button>
       )}
     </div>
