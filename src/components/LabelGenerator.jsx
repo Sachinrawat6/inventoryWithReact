@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { jsPDF } from "jspdf";
 import JsBarcode from "jsbarcode";
 import html2canvas from "html2canvas";
-import { FaBarcode, FaTag } from "react-icons/fa";
+import {FaTag } from "react-icons/fa";
 
 const LabelGenerator = () => {
   const [products, setProducts] = useState([]);
@@ -100,7 +100,7 @@ const LabelGenerator = () => {
         y += 5;
         pdf.text(`Color: ${product.color} | Size: ${product.size} `, 4, y) ;
         y += 5;
-        pdf.text(`MRP: ₹${product.mrp} | Unit: ${product.unit}`, 4, y);
+        pdf.text(`MRP: Rs.${Number(product.mrp)} | Unit: ${product.unit}`, 4, y);
         y += 5;
   
         if (product.customText) {
@@ -109,7 +109,7 @@ const LabelGenerator = () => {
           y += customLines.length * 5;
         }
   
-        const skuText = `Seller SKU: ${product.sku}`;
+        const skuText = `Seller SKU: ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]}`;
         const skuLines = pdf.splitTextToSize(skuText, 90);
         pdf.text(skuLines, 4, y);
         y += skuLines.length * 5;
