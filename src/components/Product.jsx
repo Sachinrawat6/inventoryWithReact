@@ -203,31 +203,42 @@ const Product = () => {
           </div>
 
           {/* Size */}
-          <Select
-            ref={sizeRef}
-            options={[
-              { label: "XXS", value: "XXS" },
-              { label: "XS", value: "XS" },
-              { label: "S", value: "S" },
-              { label: "M", value: "M" },
-              { label: "L", value: "L" },
-              { label: "XL", value: "XL" },
-              { label: "2XL", value: "XXL" },
-              { label: "3XL", value: "3XL" },
-              { label: "4XL", value: "4XL" },
-              { label: "5XL", value: "5XL" },
-            ]}
-            menuIsOpen={isMenuOpen}
-            onMenuClose={() => setIsMenuOpen(false)}
-            value={
-              formData.size
-                ? { label: formData.size, value: formData.size }
-                : null
-            }
-            onChange={(selectedOption) =>
-              setFormData((prev) => ({ ...prev, size: selectedOption.value }))
-            }
-          />
+         <Select
+  ref={sizeRef}
+  options={[
+    { label: "XXS", value: "XXS" },
+    { label: "XS", value: "XS" },
+    { label: "S", value: "S" },
+    { label: "M", value: "M" },
+    { label: "L", value: "L" },
+    { label: "XL", value: "XL" },
+    { label: "2XL", value: "XXL" },
+    { label: "3XL", value: "3XL" },
+    { label: "4XL", value: "4XL" },
+    { label: "5XL", value: "5XL" },
+  ]}
+  menuIsOpen={isMenuOpen}
+  onMenuClose={() => setIsMenuOpen(false)}
+  value={
+    formData.size
+      ? { label: formData.size, value: formData.size }
+      : null
+  }
+  onChange={(selectedOption) =>
+    setFormData((prev) => ({ ...prev, size: selectedOption.value }))
+  }
+  styles={{
+    menu: (provided) => ({
+      ...provided,
+      maxHeight: 'none', // Remove default scroll height
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: 'none', // Allow full height
+    }),
+  }}
+/>
+
 
           {/* Quantity */}
           <div className="flex-1">
