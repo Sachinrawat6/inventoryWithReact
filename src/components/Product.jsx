@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import Select from "react-select";
 import Iframe from "./Iframe";
 import { useGlobalContext } from "./context/ProductContext";
 
 const Product = () => {
   const productsData = useGlobalContext();
   const [products, setProducts] = useState([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     styleNumber: "",
     size: "",
@@ -15,33 +17,32 @@ const Product = () => {
     (p) => p.style_code == formData.styleNumber
   );
 
+  // finding valid rackSpace
 
-// finding valid rackSpace
-  
   function getValidRackSpace(startStyleNumber, productsData) {
     const original = parseInt(startStyleNumber);
-  
+
     // Step 1: Build a lookup map for faster access
     const styleMap = new Map();
-    productsData.forEach(p => {
+    productsData.forEach((p) => {
       styleMap.set(String(p.style_code), p);
     });
-  
+
     const getCleanRackSpace = (rackSpace) =>
       rackSpace?.replace(/['"]/g, "").trim().toUpperCase();
-  
+
     // Consider blank or 'DEFAULT' rack as invalid
     const isValidRack = (rackSpace) => {
       const cleaned = getCleanRackSpace(rackSpace);
       return cleaned && cleaned !== "DEFAULT";
     };
-  
+
     // Step 2: Check current style's rack space
     const current = styleMap.get(String(original));
     if (!current) return null;
-  
+
     const currentRack = getCleanRackSpace(current.rack_space);
-  
+
     // Only proceed if style number is 5 digits and rack is invalid
     if (String(original).length === 5 && !isValidRack(current.rack_space)) {
       // Step 3: Try +1 to +100
@@ -52,7 +53,7 @@ const Product = () => {
           return { rackSpace: next.rack_space, styleNumber: original + i };
         }
       }
-  
+
       // Step 4: Try -1 to -100
       for (let i = 1; i <= 100; i++) {
         const prev = styleMap.get(String(original - i));
@@ -61,34 +62,23 @@ const Product = () => {
           return { rackSpace: prev.rack_space, styleNumber: original - i };
         }
       }
-  
+
       // Not found
       console.warn("No valid rack space found within +/-100 range.");
       return null;
     }
-  
+
     // If current rack is valid
     if (isValidRack(current.rack_space)) {
       return { rackSpace: current.rack_space, styleNumber: original };
     }
-  
+
     return null;
   }
-  
 
-
-
-
-
-
-
-
-
-
-  
   const [editingIndex, setEditingIndex] = useState(null); // Track which product is being edited
   const styleNumberRef = useRef(null);
-
+  const sizeRef = useRef(null);
   useEffect(() => {
     styleNumberRef.current.focus();
     const savedProducts = localStorage.getItem("products");
@@ -97,12 +87,22 @@ const Product = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (formData.styleNumber.length === 5) {
+      setIsMenuOpen(true);
+      sizeRef.current?.focus();
+    }
+  }, [formData.styleNumber]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const result = getValidRackSpace(formData.styleNumber, productsData.productsData);
+  const result = getValidRackSpace(
+    formData.styleNumber,
+    productsData.productsData
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -157,17 +157,15 @@ const Product = () => {
     }
   };
 
-
-
-
-
   return (
     <div className="max-w-4xl p-6 bg-white rounded-lg">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
         {editingIndex !== null ? "Edit Product" : "Add New Product"}
       </h2>
 
-      <div className={`  absolute right-4 -top-37 overflow-hidden 2xl:w-auto xl:w-200 lg:w-115 md:w-115`}>
+      <div
+        className={`  absolute right-4 -top-37 overflow-hidden 2xl:w-auto xl:w-200 lg:w-115 md:w-115`}
+      >
         <Iframe style_id={fetchMached?.style_id} />
       </div>
 
@@ -175,8 +173,14 @@ const Product = () => {
         <div className="flex  md:w-85 lg:w-100 2xl:w-full xl:w-100 xs:w-90  flex-col gap-4">
           {/* Style Number */}
           <div className="flex-1">
-          <div className="flex justify-end">
-              <span className={`${result?.rackSpace?"block":"hidden"} bg-yellow-200 py-2 px-4 rounded-full  `} >Rack Space: {result ? result.rackSpace : "Not found"}</span>
+            <div className="flex justify-end">
+              <span
+                className={`${
+                  result?.rackSpace ? "block" : "hidden"
+                } bg-yellow-200 py-2 px-4 rounded-full  `}
+              >
+                Rack Space: {result ? result.rackSpace : "Not found"}
+              </span>
             </div>
             <label
               htmlFor="styleNumber"
@@ -184,7 +188,7 @@ const Product = () => {
             >
               Style Number *
             </label>
-            
+
             <input
               ref={styleNumberRef}
               type="text"
@@ -196,39 +200,34 @@ const Product = () => {
               className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               placeholder="Style #"
             />
-
-          
           </div>
 
           {/* Size */}
-          <div className="flex-1">
-            <label
-              htmlFor="size"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Size
-            </label>
-            <select
-              id="size"
-              name="size"
-              value={formData.size}
-              required
-              onChange={handleChange}
-              className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            >
-              <option value="">Select Size</option>
-              <option value="XXS">XXS</option>
-              <option value="XS">XS</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-              <option value="2XL">2XL</option>
-              <option value="3XL">3XL</option>
-              <option value="4XL">4XL</option>
-              <option value="5XL">5XL</option>
-            </select>
-          </div>
+          <Select
+            ref={sizeRef}
+            options={[
+              { label: "XXS", value: "XXS" },
+              { label: "XS", value: "XS" },
+              { label: "S", value: "S" },
+              { label: "M", value: "M" },
+              { label: "L", value: "L" },
+              { label: "XL", value: "XL" },
+              { label: "2XL", value: "XXL" },
+              { label: "3XL", value: "3XL" },
+              { label: "4XL", value: "4XL" },
+              { label: "5XL", value: "5XL" },
+            ]}
+            menuIsOpen={isMenuOpen}
+            onMenuClose={() => setIsMenuOpen(false)}
+            value={
+              formData.size
+                ? { label: formData.size, value: formData.size }
+                : null
+            }
+            onChange={(selectedOption) =>
+              setFormData((prev) => ({ ...prev, size: selectedOption.value }))
+            }
+          />
 
           {/* Quantity */}
           <div className="flex-1">
