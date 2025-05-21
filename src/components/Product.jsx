@@ -7,6 +7,8 @@ const Product = () => {
   const productsData = useGlobalContext();
   const [products, setProducts] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [autoSubmitOnSizeChange, setAutoSubmitOnSizeChange] = useState(false);
+
   const [formData, setFormData] = useState({
     styleNumber: "",
     size: "",
@@ -157,8 +159,20 @@ const Product = () => {
     }
   };
 
+useEffect(() => {
+  if (autoSubmitOnSizeChange && formData.size) {
+    handleSubmit({ preventDefault: () => {} });
+    setAutoSubmitOnSizeChange(false);
+  }
+}, [formData.size, autoSubmitOnSizeChange]);
+
+
+
   return (
     <div className="max-w-4xl p-6 bg-white rounded-lg">
+      <div className="bg-yellow-200 py-2 rounded mb-4 px-2 tracking-tight">
+        <marquee behavior="alternate" direction="alternative"> Select a size and the product will be added automatically. </marquee>
+      </div>
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
         {editingIndex !== null ? "Edit Product" : "Add New Product"}
       </h2>
@@ -169,7 +183,7 @@ const Product = () => {
         <Iframe style_id={fetchMached?.style_id} />
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form>
         <div className="flex  md:w-85 lg:w-100 2xl:w-full xl:w-100 xs:w-90  flex-col gap-4">
           {/* Style Number */}
           <div className="flex-1">
@@ -203,7 +217,7 @@ const Product = () => {
           </div>
 
           {/* Size */}
-         <Select
+         {/* <Select
   ref={sizeRef}
   options={[
     { label: "XXS", value: "XXS" },
@@ -219,14 +233,21 @@ const Product = () => {
   ]}
   menuIsOpen={isMenuOpen}
   onMenuClose={() => setIsMenuOpen(false)}
+  onClick={handleSubmit}
   value={
     formData.size
       ? { label: formData.size, value: formData.size }
       : null
   }
-  onChange={(selectedOption) =>
-    setFormData((prev) => ({ ...prev, size: selectedOption.value }))
-  }
+ onChange={(selectedOption) => {
+  setFormData((prev) => {
+    const updatedForm = { ...prev, size: selectedOption.value };
+    // Submit the form after setting the new size
+    setTimeout(() => handleSubmit({ preventDefault: () => {} }), 0);
+    return updatedForm;
+  });
+}}
+
   styles={{
     menu: (provided) => ({
       ...provided,
@@ -237,11 +258,54 @@ const Product = () => {
       maxHeight: 'none', // Allow full height
     }),
   }}
+  
+/> */}
+
+<Select
+  ref={sizeRef}
+  
+  options={[
+    { label: "XXS", value: "XXS" },
+    { label: "XS", value: "XS" },
+    { label: "S", value: "S" },
+    { label: "M", value: "M" },
+    { label: "L", value: "L" },
+    { label: "XL", value: "XL" },
+    { label: "2XL", value: "2XL" },
+    { label: "3XL", value: "3XL" },
+    { label: "4XL", value: "4XL" },
+    { label: "5XL", value: "5XL" },
+  ]}
+  menuIsOpen={isMenuOpen}
+  onMenuClose={() => setIsMenuOpen(false)}
+  value={formData.size ? { label: formData.size, value: formData.size } : null}
+ onChange={(selectedOption) => {
+    setFormData((prev) => ({
+      ...prev,
+      size: selectedOption.value,
+    }));
+    setAutoSubmitOnSizeChange(true);
+  }}
+  styles={{
+    menu: (provided) => ({
+      ...provided,
+      maxHeight: "none",
+      
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: "none",
+    }),
+  }}
 />
 
 
+
+
+
+
           {/* Quantity */}
-          <div className="flex-1">
+          <div className="flex-1 hidden">
             <label
               htmlFor="quantity"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -256,20 +320,20 @@ const Product = () => {
               onChange={handleChange}
               required
               min="1"
-              className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              className="w-full   px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               placeholder="Qty"
             />
           </div>
 
           {/* Submit Button */}
-          <div className="flex-1">
+          {/* <div className="flex-1">
             <button
               type="submit"
               className="w-full  bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
             >
               {editingIndex !== null ? "Update" : "Add"}
             </button>
-          </div>
+          </div> */}
         </div>
       </form>
 
