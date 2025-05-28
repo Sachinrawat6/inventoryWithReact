@@ -48,8 +48,15 @@ const Navbar = () => {
           <span>Generate Barcodes</span>
           
         </Link>
-        <Link
+        {/* <Link
         to="/label-generation"
+        className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-gray-300 hover:text-white group">
+          <FaTags className="text-pink-400 group-hover:text-pink-300" />
+          <span>Generate Labels</span>
+          
+        </Link> */}
+          <Link
+        to="https://orderid.netlify.app/" target='_blank'
         className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-gray-300 hover:text-white group">
           <FaTags className="text-pink-400 group-hover:text-pink-300" />
           <span>Generate Labels</span>
