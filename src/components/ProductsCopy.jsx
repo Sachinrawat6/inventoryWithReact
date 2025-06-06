@@ -2,14 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import Iframe from "./Iframe";
 import { useGlobalContext } from "./context/ProductContext";
-import Session from "../components/Session"
+import axios from "axios";
+import Session from "../components/Session";
+const BASE_URL = "https://return-inventory-backend.onrender.com";
 
-const Product = () => {
+const ProductsCopy = () => {
   const productsData = useGlobalContext();
+  const [sessionStart, setSessionStart] = useState(false);
+  const { getResponseFromOrders } = useGlobalContext();
+  const [ordersRecord, setOrdersRecord] = useState([]);
   const [products, setProducts] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [autoSubmitOnSizeChange, setAutoSubmitOnSizeChange] = useState(false);
-
+  const [orderId, setOrderId] = useState("");
   const [formData, setFormData] = useState({
     styleNumber: "",
     size: "",
@@ -103,15 +108,89 @@ const Product = () => {
   };
 
   const result = getValidRackSpace(
-    formData.styleNumber,
+    ordersRecord?.style_number
+      ? ordersRecord.style_number
+      : formData.styleNumber,
     productsData.productsData
   );
+
+
+//   // delete records from press table 
+// const fetchOrderIdAndDeleteRecordFromPressTable = async()=>{
+//  try {
+//    const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
+//    const data = findOrderId.data.data;
+//    const matched = data.find((p)=>Number(formData.styleNumber) === p.styleNumber && formData.size === p.size || ordersRecord?.size === p.size && Number(ordersRecord?.style_number)===p.styleNumber )
+   
+ 
+//    // delete matched orderId 
+//   try {
+//     if(!matched?.order_id){
+//       throw new Error("Order id required")
+//     }
+//      const deleteMatchedOrderid = await axios.delete(`${BASE_URL}/api/v1/press-table/delete-record`,{
+//       order_id: matched?.order_id
+//      });
+   
+//      if(deleteMatchedOrderid){
+//        console.log("Matched record deleted sucessfully", matched);
+//      }
+//   } catch (error) {
+//     console.log("Failed to delete:",error);
+//   }
+ 
+//  } catch (error) {
+//   console.log("Failed to delete matched order id", error);
+//  }
+  
+// }
+
+
+const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
+  try {
+    const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
+    const data = findOrderId.data.data;
+
+    const matched = data.find(
+      (p) =>
+        (Number(formData.styleNumber) === p.styleNumber && formData.size === p.size) ||
+        (ordersRecord?.size === p.size && Number(ordersRecord?.style_number) === p.styleNumber)
+    );
+
+    if(data.length===0){
+      return
+    }
+
+    // delete matched orderId
+    try {
+      if (!matched?.order_id) {
+        throw new Error("Order id required");
+      }
+
+      const deleteMatchedOrderid = await axios.post(`${BASE_URL}/api/v1/ship-record/ship`, {
+        
+          order_id: matched?.order_id,
+        
+      });
+
+      if (deleteMatchedOrderid) {
+        console.log("Matched record Moved to ship successfully", matched);
+      }
+    } catch (error) {
+      console.log("Failed to move in ship:", error?.response?.data || error.message);
+    }
+
+  } catch (error) {
+    console.log("Failed to delete matched order id", error?.response?.data || error.message);
+  }
+};
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const newProduct = {
-      styleNumber: formData.styleNumber.trim(),
-      size: formData.size.trim(),
+      styleNumber: formData.styleNumber.trim() || ordersRecord?.style_number,
+      size: formData.size.trim() || ordersRecord?.size,
       quantity: parseInt(formData.quantity) || 0,
       dateAdded: new Date().toISOString(),
       rackSpace: result?.rackSpace || "Not found",
@@ -130,8 +209,13 @@ const Product = () => {
 
     localStorage.setItem("products", JSON.stringify(updatedProducts));
     setProducts(updatedProducts);
+    
+
+      fetchOrderIdAndDeleteRecordFromPressTable();
+    
 
     setFormData({ styleNumber: "", size: "", quantity: 1 });
+
     styleNumberRef.current.focus();
   };
 
@@ -160,26 +244,83 @@ const Product = () => {
     }
   };
 
+
+
+
   useEffect(() => {
-    if (autoSubmitOnSizeChange && formData.size) {
+    if (
+      (autoSubmitOnSizeChange && formData.size) ||
+      (autoSubmitOnSizeChange && ordersRecord?.ordersRecord.size)
+    ) {
       handleSubmit({ preventDefault: () => {} });
       setAutoSubmitOnSizeChange(false);
     }
   }, [formData.size, autoSubmitOnSizeChange]);
 
+  const qrIdRef = useRef(null);
+
+  // 1. Fetch data when orderId is scanned
+  useEffect(() => {
+    const autoFetch = async () => {
+      if (orderId?.length === 5) {
+        try {
+          const response = await getResponseFromOrders(Number(orderId));
+          // console.log("Order response:", response);
+          setOrdersRecord(response); // Triggers the second effect
+          setOrderId("");
+        } catch (error) {
+          console.error("Failed to fetch or process order", error);
+        }
+      }
+    };
+
+    autoFetch();
+  }, [orderId]);
+
+  // 2. Auto-submit when ordersRecord is updated with valid data
+  useEffect(() => {
+    if (ordersRecord?.style_number && ordersRecord?.size) {
+      handleSubmit({ preventDefault: () => {} }); // Mimic a form submit
+      // fetchOrderIdAndDeleteRecordFromPressTable();
+      setOrdersRecord({});
+      qrIdRef.current.focus();
+    }
+  }, [ordersRecord]);
+
   return (
     <div className="max-w-4xl p-6 bg-white rounded-lg">
-      <div className="bg-yellow-200 py-2 rounded mb-4 px-2 tracking-tight">
+     
+      <Session
+        products={products}
+        setProducts={setProducts}
+        setSessionStart={setSessionStart}
+      />
+      <div
+        className={`bg-yellow-200 py-2 rounded mb-4 px-2 tracking-tight 
+          
+        `}
+      >
         <marquee behavior="alternate" direction="alternative">
           {" "}
           Select a size and the product will be added automatically.{" "}
         </marquee>
-        
       </div>
-      
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
         {editingIndex !== null ? "Edit Product" : "Add New Product"}
       </h2>
+
+      <div className={`bg-gray-50 py-2 px-4 rounded shadow mb-4 `}>
+        <p>Scan Qr Code</p>
+        <input
+          onChange={(e) => setOrderId(e.target.value)}
+          value={orderId}
+          ref={qrIdRef}
+          type="number"
+          disabled = {!sessionStart}
+          placeholder="Enter order id.."
+          className="border-gray-300 border md:w-85 lg:w-100 2xl:w-full xl:w-100 xs:w-90  outline-gray-400 cursor-pointer py-2 px-4 rounded"
+        />
+      </div>
 
       <div
         className={`  absolute right-4 -top-37 overflow-hidden 2xl:w-auto xl:w-200 lg:w-115 md:w-115`}
@@ -212,17 +353,22 @@ const Product = () => {
               type="text"
               id="styleNumber"
               name="styleNumber"
-              value={formData.styleNumber}
+              disabled={!sessionStart}
+              value={
+                ordersRecord?.style_number
+                  ? Number(ordersRecord.style_number.toString().trim())
+                  : formData.styleNumber
+              }
               onChange={handleChange}
               required
               className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               placeholder="Style #"
             />
-            
           </div>
 
           <Select
             ref={sizeRef}
+            isDisabled={!sessionStart}
             options={[
               { label: "XXS", value: "XXS" },
               { label: "XS", value: "XS" },
@@ -240,6 +386,8 @@ const Product = () => {
             value={
               formData.size
                 ? { label: formData.size, value: formData.size }
+                : ordersRecord?.size
+                ? { label: ordersRecord.size, value: ordersRecord.size }
                 : null
             }
             onChange={(selectedOption) => {
@@ -272,6 +420,7 @@ const Product = () => {
             <input
               type="number"
               id="quantity"
+              disabled={!sessionStart}
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
@@ -348,4 +497,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default ProductsCopy;

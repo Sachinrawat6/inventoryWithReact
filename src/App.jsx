@@ -5,6 +5,8 @@ import Navbar from './components/Navbar';
 import BarcodeGenerator from './components/BarcodeGenerator';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LabelGenerator from './components/LabelGenerator';
+import ProductsCopy from './components/ProductsCopy';
+import SessionId from './components/SessionId';
 
 const App = () => {
   return (
@@ -19,9 +21,11 @@ const App = () => {
           {/* Scrollable content area */}
           <div className="flex-1 ml-64 pl-6 pr-6 overflow-y-auto">
             <Routes>
-              <Route path='/' element={<Product/>} />
+              <Route path='/' element={<ProductsCopy/>} />
               <Route path='/barcode-generation' element={<BarcodeGenerator/>} />
               <Route path='/label-generation' element={<LabelGenerator/>} />
+              <Route path='/sessions' element={<SessionId/>} />
+
             </Routes>
           </div>
         </div>

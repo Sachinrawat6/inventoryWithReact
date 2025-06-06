@@ -5,6 +5,7 @@ import { useGlobalContext } from './context/ProductContext';
 import downloadMrpLable from './DownloadMrpLabel';
 import downloadBarcodes from './DownloadBarcode';
 import { Link } from 'react-router-dom';
+import { PiEngine } from 'react-icons/pi';
 const Navbar = () => {
 
   const {productsData} = useGlobalContext();
@@ -48,18 +49,20 @@ const Navbar = () => {
           <span>Generate Barcodes</span>
           
         </Link>
-        {/* <Link
-        to="/label-generation"
-        className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-gray-300 hover:text-white group">
-          <FaTags className="text-pink-400 group-hover:text-pink-300" />
-          <span>Generate Labels</span>
-          
-        </Link> */}
+     
           <Link
         to="https://orderid.netlify.app/" target='_blank'
         className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-gray-300 hover:text-white group">
           <FaTags className="text-pink-400 group-hover:text-pink-300" />
           <span>Generate Labels</span>
+          
+        </Link>
+           <Link
+        to="/sessions"
+        className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-gray-300 hover:text-white group">
+          <PiEngine className="text-red-400 group-hover:text-red-300" />
+          
+          <span>Session</span>
           
         </Link>
        </div>
