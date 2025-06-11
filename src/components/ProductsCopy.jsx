@@ -384,7 +384,7 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
               type="text"
               id="styleNumber"
               name="styleNumber"
-              // disabled={!sessionStart}
+              disabled={!sessionStart}
               value={
                 ordersRecord?.style_number
                   ? Number(ordersRecord.style_number.toString().trim())
