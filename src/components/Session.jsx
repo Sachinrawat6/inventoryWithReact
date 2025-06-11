@@ -1,5 +1,5 @@
 const BASE_URL = "https://return-inventory-backend.onrender.com";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const Session = ({ products, setProducts, setSessionStart }) => {
@@ -7,7 +7,16 @@ const Session = ({ products, setProducts, setSessionStart }) => {
     localStorage.getItem("sessionId") || null
   );
   const [saveProgress, setSaveProgress] = useState(0);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [endingSession, setEndingSession] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+
+  useEffect(()=>{
+    if(sessionId){
+      setSessionStart(true);
+    }
+  },[])
 
   const handleStartSession = () => {
     setSessionStart(true);
@@ -62,11 +71,15 @@ const Session = ({ products, setProducts, setSessionStart }) => {
 // };
 const handleEndSession = async () => {
   setSessionStart(false);
+  setEndingSession(true);
   if (!sessionId || products.length === 0) {
     alert("No session or products found.");
     return;
   }
-
+if(!selectedLocation){
+  alert("Please select Cart First.")
+  return
+}
   setIsSaving(true);
   setSaveProgress(0);
 
@@ -81,8 +94,11 @@ const handleEndSession = async () => {
   try {
     await axios.post(`${BASE_URL}/api/v1/inventory-table/inventory/save`, {
       session_id: sessionId,
+      location:selectedLocation,
       products,
     });
+  
+
 
     clearInterval(progressInterval);
     setSaveProgress(100);
@@ -99,8 +115,12 @@ const handleEndSession = async () => {
       alert("Session ended. Products saved.");
       setSessionId(null);
       localStorage.removeItem("sessionId"); // allow new session
-      setProducts([]); // clear UI products
+      // setProducts([]); // clear UI products
+      setSelectedLocation("");
+      setSessionStart(false)
+      setEndingSession(false);
     }, 300);
+    // window.location.reload();
   } catch (error) {
     clearInterval(progressInterval);
     setIsSaving(false);
@@ -130,6 +150,17 @@ const handleEndSession = async () => {
       >
         End Session
       </button>
+         <div className={`${endingSession?"block":"hidden"} col-span-3 text-sm text-blue-700 font-semibold text-center mt-2`}>
+          <select 
+          onChange={(e)=>setSelectedLocation(e.target.value)}
+          className="border border-blue-300 py-2 px-4 w-full rounded outline-blue-500"
+          >
+            <option value="">Select Cart</option>
+            <option value="Big Cart">Big Cart</option>
+            <option value="Small Cart">Small Cart</option>
+            <option value="Tag Generation">Tag Generation</option>
+          </select>
+        </div>
       {sessionId && (
         <div className="col-span-3 text-sm text-blue-700 font-semibold text-center mt-2">
           Active Session ID: <span className="font-mono">{sessionId}</span>

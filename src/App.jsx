@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LabelGenerator from './components/LabelGenerator';
 import ProductsCopy from './components/ProductsCopy';
 import SessionId from './components/SessionId';
+import ScanAndViewProductImg from './components/ScanAndViewProductImg';
 
 const App = () => {
   return (
@@ -25,6 +26,8 @@ const App = () => {
               <Route path='/barcode-generation' element={<BarcodeGenerator/>} />
               <Route path='/label-generation' element={<LabelGenerator/>} />
               <Route path='/sessions' element={<SessionId/>} />
+              <Route path='/test' element={<ScanAndViewProductImg/>} />
+
 
             </Routes>
           </div>

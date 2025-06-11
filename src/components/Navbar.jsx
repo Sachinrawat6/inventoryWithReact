@@ -12,7 +12,7 @@ const Navbar = () => {
 
   const deleteAll= ()=>{
     if (window.confirm('Are you sure you want to delete this product?')){
-      localStorage.clear('products');
+      localStorage.removeItem('products');
       window.location.reload();
     }
   }

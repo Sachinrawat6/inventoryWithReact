@@ -11,6 +11,9 @@ const ProductsCopy = () => {
   const [sessionStart, setSessionStart] = useState(false);
   const { getResponseFromOrders } = useGlobalContext();
   const [ordersRecord, setOrdersRecord] = useState([]);
+   const [sessionId, setSessionId] = useState(
+      localStorage.getItem("sessionId") || null
+    );
   const [products, setProducts] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [autoSubmitOnSizeChange, setAutoSubmitOnSizeChange] = useState(false);
@@ -22,7 +25,7 @@ const ProductsCopy = () => {
   });
 
   const fetchMached = productsData.productsData.find(
-    (p) => p.style_code == formData.styleNumber
+    (p) => p.style_code === Number(!orderId ? formData?.styleNumber : ordersRecord?.style_number)
   );
 
   // finding valid rackSpace
@@ -100,7 +103,7 @@ const ProductsCopy = () => {
       setIsMenuOpen(true);
       sizeRef.current?.focus();
     }
-  }, [formData.styleNumber]);
+  }, [formData?.styleNumber]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -109,8 +112,8 @@ const ProductsCopy = () => {
 
   const result = getValidRackSpace(
     ordersRecord?.style_number
-      ? ordersRecord.style_number
-      : formData.styleNumber,
+      ? ordersRecord?.style_number
+      : formData?.styleNumber,
     productsData.productsData
   );
 
@@ -255,7 +258,7 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
       handleSubmit({ preventDefault: () => {} });
       setAutoSubmitOnSizeChange(false);
     }
-  }, [formData.size, autoSubmitOnSizeChange]);
+  }, [formData?.size, autoSubmitOnSizeChange]);
 
   const qrIdRef = useRef(null);
 
@@ -265,9 +268,10 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
       if (orderId?.length === 5) {
         try {
           const response = await getResponseFromOrders(Number(orderId));
-          // console.log("Order response:", response);
+          styleNumberRef.current.focus();
+          styleNumberRef.current.select();
           setOrdersRecord(response); // Triggers the second effect
-          setOrderId("");
+          // setOrderId("");
         } catch (error) {
           console.error("Failed to fetch or process order", error);
         }
@@ -277,15 +281,27 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
     autoFetch();
   }, [orderId]);
 
-  // 2. Auto-submit when ordersRecord is updated with valid data
-  useEffect(() => {
-    if (ordersRecord?.style_number && ordersRecord?.size) {
-      handleSubmit({ preventDefault: () => {} }); // Mimic a form submit
+  const scanAndAddProduct = (e)=>{
+    e.preventDefault();
+     handleSubmit({ preventDefault: () => {} }); // Mimic a form submit
       // fetchOrderIdAndDeleteRecordFromPressTable();
       setOrdersRecord({});
+      setOrderId("")
       qrIdRef.current.focus();
-    }
-  }, [ordersRecord]);
+
+  }
+
+
+
+  // 2. Auto-submit when ordersRecord is updated with valid data
+  // useEffect(() => {
+  //   if (ordersRecord?.style_number && ordersRecord?.size) {
+  //     handleSubmit({ preventDefault: () => {} }); // Mimic a form submit
+  //     // fetchOrderIdAndDeleteRecordFromPressTable();
+  //     setOrdersRecord({});
+  //     qrIdRef.current.focus();
+  //   }
+  // }, [ordersRecord]);
 
   return (
     <div className="max-w-4xl p-6 bg-white rounded-lg">
@@ -310,25 +326,40 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
       </h2>
 
       <div className={`bg-gray-50 py-2 px-4 rounded shadow mb-4 `}>
-        <p>Scan Qr Code</p>
-        <input
-          onChange={(e) => setOrderId(e.target.value)}
-          value={orderId}
-          ref={qrIdRef}
-          type="number"
-          disabled = {!sessionStart}
-          placeholder="Enter order id.."
-          className="border-gray-300 border md:w-85 lg:w-100 2xl:w-full xl:w-100 xs:w-90  outline-gray-400 cursor-pointer py-2 px-4 rounded"
-        />
+        
+       <div className="flex items-center gap-4 flex-wrap">
+  
+
+  {/* Input and Button Group */}
+  <form onSubmit={scanAndAddProduct}>
+  <div className="flex flex-wrap items-center gap-3">
+    {/* Order ID Input */}
+    <input
+      onChange={(e) => setOrderId(e.target.value)}
+      value={orderId}
+      ref={qrIdRef}
+      type="number"
+      disabled={!sessionStart}
+      placeholder="Scan order ID..."
+      className={`border border-gray-300 rounded-md py-2 px-4 
+        outline-none focus:ring-2 focus:ring-blue-500 
+        disabled:bg-gray-100 disabled:cursor-not-allowed
+        w-64 sm:w-72 md:w-80 lg:w-96`}
+    />
+
+  </div>
+  </form>
+</div>
+
       </div>
 
       <div
-        className={`  absolute right-4 -top-37 overflow-hidden 2xl:w-auto xl:w-200 lg:w-115 md:w-115`}
+        className={`  absolute right-4 -top-48 overflow-hidden 2xl:w-auto xl:w-200 lg:w-115 md:w-115`}
       >
         <Iframe style_id={fetchMached?.style_id} />
       </div>
 
-      <form>
+      <form onSubmit={scanAndAddProduct}>
         <div className="flex  md:w-85 lg:w-100 2xl:w-full xl:w-100 xs:w-90  flex-col gap-4">
           {/* Style Number */}
           <div className="flex-1">
@@ -353,13 +384,13 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
               type="text"
               id="styleNumber"
               name="styleNumber"
-              disabled={!sessionStart}
+              // disabled={!sessionStart}
               value={
                 ordersRecord?.style_number
                   ? Number(ordersRecord.style_number.toString().trim())
                   : formData.styleNumber
               }
-              onChange={handleChange}
+              onChange={ handleChange}
               required
               className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               placeholder="Style #"
@@ -427,6 +458,21 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
               required
               min="1"
               className="w-full   px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Qty"
+            />
+          </div>
+
+           {/* Add button */}
+          <div className={`${orderId?"block":"hidden"} flex-1 `}>
+            <input
+              type="submit"
+              disabled={!sessionStart && !orderId}
+              name="quantity"
+              value="Add"
+              onChange={handleChange}
+              required
+              min="1"
+              className={`w-full   px-4 py-2 border border-gray-300 rounded-md focus:ring-2 bg-[#222] text-white font-medium cursor-pointer hover:bg-[#333] outline-none transition ${!orderId?"cursor-not-allowed":"cursor-pointer"}`}
               placeholder="Qty"
             />
           </div>
