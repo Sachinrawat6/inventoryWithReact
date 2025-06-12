@@ -5,6 +5,8 @@ const SessionId = () => {
   const [sessions, setSessions] = useState([]);
   const BASE_URL = "https://return-inventory-backend.onrender.com";
 
+  
+
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("endedSessions") || "[]");
     setSessions(stored);
