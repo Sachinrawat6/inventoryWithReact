@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { PiEngine } from 'react-icons/pi';
 const Navbar = () => {
 
-  const {productsData} = useGlobalContext();
+  const {productsData, colors} = useGlobalContext();
 
   const deleteAll= ()=>{
     if (window.confirm('Are you sure you want to delete this product?')){
@@ -74,7 +74,7 @@ const Navbar = () => {
         <h2 className='text-white text-xl'>Download Buttons</h2>
         <hr className='text-slate-700 my-2' />
         <button 
-          onClick={()=>downloadStock(productsData)}
+          onClick={()=>downloadStock(colors)}
         className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 text-white group">
           <FaBoxes className="text-blue-400 group-hover:text-blue-300" />
           <span>Inventory</span>
