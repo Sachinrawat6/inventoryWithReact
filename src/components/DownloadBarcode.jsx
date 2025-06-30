@@ -20,7 +20,8 @@ const downloadBarcodes = (data)=>{
           // Ensure all required fields exist with fallbacks
           return [
             `${product.styleNumber}-${product.size}`,
-            `(${matched?.rack_space==="" || matched?.rack_space.toLowerCase()==="default"  ?product?.rackSpace:matched?.rack_space}) `,
+            // `(${matched?.rack_space==="" || matched?.rack_space.toLowerCase()==="default"  ?product?.rackSpace:matched?.rack_space}) `,
+            product?.rackSpace,
             `${matched?.color}`,
             product?.quantity
           ].join(',');
