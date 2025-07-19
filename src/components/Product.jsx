@@ -204,7 +204,7 @@ const Product = () => {
               htmlFor="styleNumber"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Style Number *
+              Style Number *  : Total Added Product {console.log(products)}
             </label>
 
             <input

@@ -367,16 +367,16 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
               <span
                 className={`${
                   result?.rackSpace ? "block" : "hidden"
-                } bg-yellow-200 py-2 px-4 rounded-full  `}
+                } bg-yellow-200 py-2 px-4 rounded-full mb-2 `}
               >
                 Rack Space: {result ? result.rackSpace : "Not found"}
               </span>
             </div>
             <label
               htmlFor="styleNumber"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className=" text-sm font-medium text-gray-700 items-center mb-2  flex justify-between"
             >
-              Style Number *
+              Style Number *  : <h2 className="font-bold text-green-800 bg-green-200 p-2 rounded-md shadow "> Total Added Products : {products.length}</h2>
             </label>
 
             <input
