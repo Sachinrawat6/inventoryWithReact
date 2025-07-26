@@ -11,9 +11,9 @@ const ProductsCopy = () => {
   const [sessionStart, setSessionStart] = useState(false);
   const { getResponseFromOrders } = useGlobalContext();
   const [ordersRecord, setOrdersRecord] = useState([]);
-   const [sessionId, setSessionId] = useState(
-      localStorage.getItem("sessionId") || null
-    );
+  const [sessionId, setSessionId] = useState(
+    localStorage.getItem("sessionId") || null
+  );
   const [products, setProducts] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [autoSubmitOnSizeChange, setAutoSubmitOnSizeChange] = useState(false);
@@ -118,75 +118,75 @@ const ProductsCopy = () => {
   );
 
 
-//   // delete records from press table 
-// const fetchOrderIdAndDeleteRecordFromPressTable = async()=>{
-//  try {
-//    const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
-//    const data = findOrderId.data.data;
-//    const matched = data.find((p)=>Number(formData.styleNumber) === p.styleNumber && formData.size === p.size || ordersRecord?.size === p.size && Number(ordersRecord?.style_number)===p.styleNumber )
-   
- 
-//    // delete matched orderId 
-//   try {
-//     if(!matched?.order_id){
-//       throw new Error("Order id required")
-//     }
-//      const deleteMatchedOrderid = await axios.delete(`${BASE_URL}/api/v1/press-table/delete-record`,{
-//       order_id: matched?.order_id
-//      });
-   
-//      if(deleteMatchedOrderid){
-//        console.log("Matched record deleted sucessfully", matched);
-//      }
-//   } catch (error) {
-//     console.log("Failed to delete:",error);
-//   }
- 
-//  } catch (error) {
-//   console.log("Failed to delete matched order id", error);
-//  }
-  
-// }
+  //   // delete records from press table 
+  // const fetchOrderIdAndDeleteRecordFromPressTable = async()=>{
+  //  try {
+  //    const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
+  //    const data = findOrderId.data.data;
+  //    const matched = data.find((p)=>Number(formData.styleNumber) === p.styleNumber && formData.size === p.size || ordersRecord?.size === p.size && Number(ordersRecord?.style_number)===p.styleNumber )
 
 
-const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
-  try {
-    const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
-    const data = findOrderId.data.data;
+  //    // delete matched orderId 
+  //   try {
+  //     if(!matched?.order_id){
+  //       throw new Error("Order id required")
+  //     }
+  //      const deleteMatchedOrderid = await axios.delete(`${BASE_URL}/api/v1/press-table/delete-record`,{
+  //       order_id: matched?.order_id
+  //      });
 
-    const matched = data.find(
-      (p) =>
-        (Number(formData.styleNumber) === p.styleNumber && formData.size === p.size) ||
-        (ordersRecord?.size === p.size && Number(ordersRecord?.style_number) === p.styleNumber)
-    );
+  //      if(deleteMatchedOrderid){
+  //        console.log("Matched record deleted sucessfully", matched);
+  //      }
+  //   } catch (error) {
+  //     console.log("Failed to delete:",error);
+  //   }
 
-    if(data.length===0){
-      return
-    }
+  //  } catch (error) {
+  //   console.log("Failed to delete matched order id", error);
+  //  }
 
-    // delete matched orderId
+  // }
+
+
+  const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
     try {
-      if (!matched?.order_id) {
-        throw new Error("Order id required");
+      const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
+      const data = findOrderId.data.data;
+
+      const matched = data.find(
+        (p) =>
+          (Number(formData.styleNumber) === p.styleNumber && formData.size === p.size) ||
+          (ordersRecord?.size === p.size && Number(ordersRecord?.style_number) === p.styleNumber)
+      );
+
+      if (data.length === 0) {
+        return
       }
 
-      const deleteMatchedOrderid = await axios.post(`${BASE_URL}/api/v1/ship-record/ship`, {
-        
+      // delete matched orderId
+      try {
+        if (!matched?.order_id) {
+          throw new Error("Order id required");
+        }
+
+        const deleteMatchedOrderid = await axios.post(`${BASE_URL}/api/v1/ship-record/ship`, {
+
           order_id: matched?.order_id,
-        
-      });
 
-      if (deleteMatchedOrderid) {
-        console.log("Matched record Moved to ship successfully", matched);
+        });
+
+        if (deleteMatchedOrderid) {
+          console.log("Matched record Moved to ship successfully", matched);
+        }
+      } catch (error) {
+        console.log("Failed to move in ship:", error?.response?.data || error.message);
       }
-    } catch (error) {
-      console.log("Failed to move in ship:", error?.response?.data || error.message);
-    }
 
-  } catch (error) {
-    console.log("Failed to delete matched order id", error?.response?.data || error.message);
-  }
-};
+    } catch (error) {
+      console.log("Failed to delete matched order id", error?.response?.data || error.message);
+    }
+  };
 
 
   const handleSubmit = (e) => {
@@ -212,10 +212,10 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
 
     localStorage.setItem("products", JSON.stringify(updatedProducts));
     setProducts(updatedProducts);
-    
 
-      fetchOrderIdAndDeleteRecordFromPressTable();
-    
+
+    fetchOrderIdAndDeleteRecordFromPressTable();
+
 
     setFormData({ styleNumber: "", size: "", quantity: 1 });
 
@@ -255,14 +255,46 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
       (autoSubmitOnSizeChange && formData.size) ||
       (autoSubmitOnSizeChange && ordersRecord?.ordersRecord.size)
     ) {
-      handleSubmit({ preventDefault: () => {} });
+      handleSubmit({ preventDefault: () => { } });
       setAutoSubmitOnSizeChange(false);
     }
   }, [formData?.size, autoSubmitOnSizeChange]);
 
   const qrIdRef = useRef(null);
 
+  // ****************************// before 26-07-2025 code ************************
+
   // 1. Fetch data when orderId is scanned
+  // useEffect(() => {
+  //   const autoFetch = async () => {
+  //     if (orderId?.length === 5) {
+  //       try {
+  //         const response = await getResponseFromOrders(Number(orderId));
+  //         styleNumberRef.current.focus();
+  //         styleNumberRef.current.select();
+  //         setOrdersRecord(response); // Triggers the second effect
+  //         // setOrderId("");
+  //       } catch (error) {
+  //         console.error("Failed to fetch or process order", error);
+  //       }
+  //     }
+  //   };
+
+  //   autoFetch();
+  // }, [orderId]);
+
+  // const scanAndAddProduct = (e) => {
+  //   e.preventDefault();
+  //   handleSubmit({ preventDefault: () => { } }); // Mimic a form submit
+  //   // fetchOrderIdAndDeleteRecordFromPressTable();
+  //   setOrdersRecord({});
+  //   setOrderId("");
+  //   qrIdRef.current.focus();
+
+  // }
+
+  // ****************************// after 26-07-2025 code ************************
+
   useEffect(() => {
     const autoFetch = async () => {
       if (orderId?.length === 5) {
@@ -270,8 +302,8 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
           const response = await getResponseFromOrders(Number(orderId));
           styleNumberRef.current.focus();
           styleNumberRef.current.select();
-          setOrdersRecord(response); // Triggers the second effect
-          // setOrderId("");
+          setOrdersRecord(response);
+          // Don't clear orderId here
         } catch (error) {
           console.error("Failed to fetch or process order", error);
         }
@@ -281,16 +313,17 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
     autoFetch();
   }, [orderId]);
 
-  const scanAndAddProduct = (e)=>{
+  const scanAndAddProduct = (e) => {
     e.preventDefault();
-     handleSubmit({ preventDefault: () => {} }); // Mimic a form submit
-      // fetchOrderIdAndDeleteRecordFromPressTable();
-      setOrdersRecord({});
-      setOrderId("")
-      qrIdRef.current.focus();
-
-  }
-
+    if (!ordersRecord || Object.keys(ordersRecord).length === 0) {
+      // Don't submit if no order record is loaded
+      return;
+    }
+    handleSubmit({ preventDefault: () => { } });
+    setOrdersRecord({});
+    setOrderId("");
+    qrIdRef.current.focus();
+  };
 
 
   // 2. Auto-submit when ordersRecord is updated with valid data
@@ -305,7 +338,7 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
 
   return (
     <div className="max-w-4xl p-6 bg-white rounded-lg">
-     
+
       <Session
         products={products}
         setProducts={setProducts}
@@ -326,30 +359,30 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
       </h2>
 
       <div className={`bg-gray-50 py-2 px-4 rounded shadow mb-4 `}>
-        
-       <div className="flex items-center gap-4 flex-wrap">
-  
 
-  {/* Input and Button Group */}
-  <form onSubmit={scanAndAddProduct}>
-  <div className="flex flex-wrap items-center gap-3">
-    {/* Order ID Input */}
-    <input
-      onChange={(e) => setOrderId(e.target.value)}
-      value={orderId}
-      ref={qrIdRef}
-      type="number"
-      disabled={!sessionStart}
-      placeholder="Scan order ID..."
-      className={`border border-gray-300 rounded-md py-2 px-4 
+        <div className="flex items-center gap-4 flex-wrap">
+
+
+          {/* Input and Button Group */}
+          <form onSubmit={scanAndAddProduct}>
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Order ID Input */}
+              <input
+                onChange={(e) => setOrderId(e.target.value)}
+                value={orderId}
+                ref={qrIdRef}
+                type="number"
+                disabled={!sessionStart}
+                placeholder="Scan order ID..."
+                className={`border border-gray-300 rounded-md py-2 px-4 
         outline-none focus:ring-2 focus:ring-blue-500 
         disabled:bg-gray-100 disabled:cursor-not-allowed
         w-64 sm:w-72 md:w-80 lg:w-96`}
-    />
+              />
 
-  </div>
-  </form>
-</div>
+            </div>
+          </form>
+        </div>
 
       </div>
 
@@ -365,9 +398,8 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
           <div className="flex-1">
             <div className="flex justify-end">
               <span
-                className={`${
-                  result?.rackSpace ? "block" : "hidden"
-                } bg-yellow-200 py-2 px-4 rounded-full mb-2 `}
+                className={`${result?.rackSpace ? "block" : "hidden"
+                  } bg-yellow-200 py-2 px-4 rounded-full mb-2 `}
               >
                 Rack Space: {result ? result.rackSpace : "Not found"}
               </span>
@@ -390,7 +422,7 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
                   ? Number(ordersRecord.style_number.toString().trim())
                   : formData.styleNumber
               }
-              onChange={ handleChange}
+              onChange={handleChange}
               required
               className="w-full  px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               placeholder="Style #"
@@ -418,8 +450,8 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
               formData.size
                 ? { label: formData.size, value: formData.size }
                 : ordersRecord?.size
-                ? { label: ordersRecord.size, value: ordersRecord.size }
-                : null
+                  ? { label: ordersRecord.size, value: ordersRecord.size }
+                  : null
             }
             onChange={(selectedOption) => {
               setFormData((prev) => ({
@@ -462,8 +494,8 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
             />
           </div>
 
-           {/* Add button */}
-          <div className={`${orderId?"block":"hidden"} flex-1 `}>
+          {/* Add button */}
+          <div className={`${orderId ? "block" : "hidden"} flex-1 `}>
             <input
               type="submit"
               disabled={!sessionStart && !orderId}
@@ -472,7 +504,7 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
               onChange={handleChange}
               required
               min="1"
-              className={`w-full   px-4 py-2 border border-gray-300 rounded-md focus:ring-2 bg-[#222] text-white font-medium cursor-pointer hover:bg-[#333] outline-none transition ${!orderId?"cursor-not-allowed":"cursor-pointer"}`}
+              className={`w-full   px-4 py-2 border border-gray-300 rounded-md focus:ring-2 bg-[#222] text-white font-medium cursor-pointer hover:bg-[#333] outline-none transition ${!orderId ? "cursor-not-allowed" : "cursor-pointer"}`}
               placeholder="Qty"
             />
           </div>
@@ -491,9 +523,8 @@ const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
             {products.map((product, index) => (
               <div
                 key={index}
-                className={`flex items-center gap-4 p-3 rounded-md hover:bg-gray-100 transition-colors ${
-                  editingIndex === index ? "bg-blue-50" : "bg-gray-50"
-                }`}
+                className={`flex items-center gap-4 p-3 rounded-md hover:bg-gray-100 transition-colors ${editingIndex === index ? "bg-blue-50" : "bg-gray-50"
+                  }`}
               >
                 <div className="flex-1 font-medium">{product.styleNumber}</div>
                 <div className="flex-1">{product.size}</div>
