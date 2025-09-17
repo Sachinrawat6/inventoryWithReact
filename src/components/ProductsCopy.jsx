@@ -297,7 +297,7 @@ const ProductsCopy = () => {
 
   useEffect(() => {
     const autoFetch = async () => {
-      if (orderId?.length === 5) {
+      if (orderId?.length >= 5) {
         try {
           const response = await getResponseFromOrders(Number(orderId));
           styleNumberRef.current.focus();
