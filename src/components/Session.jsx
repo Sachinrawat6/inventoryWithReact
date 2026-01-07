@@ -141,7 +141,7 @@ if(!selectedLocation){
         className="bg-blue-500 py-4 px-4 rounded shadow cursor-pointer font-medium text-white hover:bg-blue-600 duration-75 ease-in"
         disabled={!!sessionId}
       >
-        Start Session
+        Start Session test
       </button>
       <button
         onClick={handleEndSession}
