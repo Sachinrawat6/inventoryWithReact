@@ -6,7 +6,10 @@ const ProductContext = createContext();
 const ProductContextProvider = ({ children }) => {
   const [productsData, setProductsData] = useState([]);
   const [colors, setColors] = useState([]);
-  
+  const [coordsData, setCoordsData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const[googleSheetColors,setGoogleSheetColors]=useState([])
   const BASE_URL = "https://fastapi.qurvii.com";
 
 // product fetching like mrp style_id etc 
@@ -34,14 +37,124 @@ const fetchColors = async()=>{
   };
 
 
+    
+    const fetchCoordsDataFromGoogleSheet = async () => {
+  setLoading(true);
+
+  try {
+    const sheetId = "1SIP3Glxo5vkL0Jvx9ulj0p6xZoOh0ruzRtIqzldmb8E";
+    const apiKey = "AIzaSyAGjWAyG29vKBgiYVSXCn08cu5ym6FwiQs";
+    const range = "co-ords rack!A1:K"; // full columns
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+    const response = await axios.get(url);
+    const values = response.data.values;
+    if (!values || values.length === 0) {
+      setCoordsData([]);
+      return;
+    }
+
+    // 🧠 Step 1: Headers normalize
+    const headers = values[0].map(h =>
+      h
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[^a-z0-9]/g, "")
+    );
+
+    // 🧠 Step 2: Convert rows → structured JSON
+    const formattedData = values.slice(1).map(row => {
+      return headers.reduce((obj, key, index) => {
+        let value = row[index] ?? null;
+
+        // Type casting
+        if ((key === "mrp" || key==="style1" || key==="style2" ||  key==="coordstyle") && value !== null) {
+        // if (key === "mrp"  && value !== null) {
+          value = Number(value);
+        }
+
+        if (key === "listindividually") {
+          value = value === "TRUE" || value === true;
+        }
+
+        obj[key] = value;
+        return obj;
+      }, {});
+    });
+
+    setCoordsData(formattedData);
+    console.log("Coords Structured Data", formattedData);
+
+  } catch (error) {
+    console.error("Failed to fetch coords data :: ", error);
+    setError(`Failed to fetch coords data :: ${error?.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+// *************** fetch colors from google sheet *****************
+    const fetchColorsFromGoogleSheet = async () => {
+  setLoading(true);
+
+  try {
+    const sheetId = "1SIP3Glxo5vkL0Jvx9ulj0p6xZoOh0ruzRtIqzldmb8E";
+    const apiKey = "AIzaSyAGjWAyG29vKBgiYVSXCn08cu5ym6FwiQs";
+    const range = "sw data!A1:I"; // full columns
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+    const response = await axios.get(url);
+    const values = response.data.values;
+    if (!values || values.length === 0) {
+      setCoordsData([]);
+      return;
+    }
+
+    // 🧠 Step 1: Headers normalize
+    const headers = values[0].map(h =>
+      h
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[^a-z0-9]/g, "")
+    );
+
+    // 🧠 Step 2: Convert rows → structured JSON
+    const formattedData = values.slice(1).map(row => {
+      return headers.reduce((obj, key, index) => {
+        let value = row[index] ?? null;
+        obj[key] = value;
+        return obj;
+      }, {});
+    });
+
+    setGoogleSheetColors(formattedData);
+    console.log("Colors Structured Data", formattedData);
+
+  } catch (error) {
+    console.error("Failed to fetch colors data :: ", error);
+    setError(`Failed to fetch colors  data :: ${error?.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+  
+
 
 useEffect(()=>{
     fetchProducts();
+    fetchCoordsDataFromGoogleSheet();
+    fetchColorsFromGoogleSheet();
     fetchColors();
 },[])
 
   return (
-    <ProductContext.Provider value={{ productsData ,getResponseFromOrders,colors }}>
+    <ProductContext.Provider value={{ productsData ,getResponseFromOrders,colors, coordsData,googleSheetColors }}>
       {children}
     </ProductContext.Provider>
   );

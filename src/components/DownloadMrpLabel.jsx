@@ -1,9 +1,7 @@
-const downloadMrpLable = (data)=>{
+const downloadMrpLable = (data, googleSheetColors)=>{
     try {
         // 1. Get products from localStorage
         const products = JSON.parse(localStorage.getItem("products")) || [];
-        
-        
         if (products.length === 0) {
           alert("No products found in inventory!");
           return;
@@ -14,15 +12,16 @@ const downloadMrpLable = (data)=>{
         
         // 3. Process ALL products into CSV rows
         const csvRows = products.map(product => {
-          const matched = data?.find((p)=>p.style_code==product.styleNumber);
+          // const matched = data?.find((p)=>p.style_code==product.styleNumber);
+          const matched = googleSheetColors?.find((p)=>p.stylenumber==product.styleNumber);
           const custome_Text =`MFG & MKT BY: Qurvii. 2nd Floor. B149. Sector 6. Noida. UP. 201301`;
           // Ensure all required fields exist with fallbacks
           return [
             '50 mm x 25 mm on Roll - PDF', // DropshipWarehouseId
             `${product.styleNumber}-${product.size}` , // Item SkuCode
-            matched?.style_name || "Qurvii Product",
+            matched?.stylename?.trim() || "Qurvii Product",
             'Qurvii',
-            matched?.color || "Other",
+            matched?.styleprimarycolor?.trim() || "Other",
             product?.size,
             '1 Pcs',
             matched?.mrp || 4360,

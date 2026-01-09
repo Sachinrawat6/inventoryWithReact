@@ -11,7 +11,7 @@ const downloadBarcodes = (data)=>{
         }
     
         // 2. Prepare CSV header
-        const headers =  "Barcode,Title,Label Type,Qty\n";
+        const headers =  "OrderId,Barcode,Title,Label Type,Qty\n";
         
         // 3. Process ALL products into CSV rows
         const csvRows = products.map(product => {
@@ -19,7 +19,8 @@ const downloadBarcodes = (data)=>{
           
           // Ensure all required fields exist with fallbacks
           return [
-            `${product.styleNumber}-${product.size}`,
+            `${product.orderId}`,
+            `${product.styleNumber}-${product.size}-${product.parentStyleNumber}`,
             // `(${matched?.rack_space==="" || matched?.rack_space.toLowerCase()==="default"  ?product?.rackSpace:matched?.rack_space}) `,
             product?.rackSpace,
             `${matched?.color}`,

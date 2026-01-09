@@ -9,7 +9,7 @@ const BASE_URL = "https://return-inventory-backend.onrender.com";
 const ProductsCopy = () => {
   const productsData = useGlobalContext();
   const [sessionStart, setSessionStart] = useState(false);
-  const { getResponseFromOrders } = useGlobalContext();
+  const { getResponseFromOrders,coordsData } = useGlobalContext();
   const [ordersRecord, setOrdersRecord] = useState([]);
   const [sessionId, setSessionId] = useState(
     localStorage.getItem("sessionId") || null
@@ -28,6 +28,17 @@ const ProductsCopy = () => {
     (p) => p.style_code === Number(!orderId ? formData?.styleNumber : ordersRecord?.style_number)
   );
 
+
+  // ********************* co-ords rackSpace matching logics ************************
+
+   const matchedCoords = coordsData.find((co)=>(co.style1 === Number(formData.styleNumber) || co.style1 === Number(ordersRecord?.style_number)) 
+  || (co.style2 === Number(formData.styleNumber) || co.style2 === Number(ordersRecord?.style_number)) 
+  || (co.coordstyle === Number(formData.styleNumber) || co.coordstyle === Number(ordersRecord?.style_number))
+);
+
+
+  if(matchedCoords){    console.log("Matched Coords Data",matchedCoords);
+  }
   // finding valid rackSpace
 
   function getValidRackSpace(startStyleNumber, productsData) {
@@ -118,37 +129,6 @@ const ProductsCopy = () => {
   );
 
 
-  //   // delete records from press table 
-  // const fetchOrderIdAndDeleteRecordFromPressTable = async()=>{
-  //  try {
-  //    const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
-  //    const data = findOrderId.data.data;
-  //    const matched = data.find((p)=>Number(formData.styleNumber) === p.styleNumber && formData.size === p.size || ordersRecord?.size === p.size && Number(ordersRecord?.style_number)===p.styleNumber )
-
-
-  //    // delete matched orderId 
-  //   try {
-  //     if(!matched?.order_id){
-  //       throw new Error("Order id required")
-  //     }
-  //      const deleteMatchedOrderid = await axios.delete(`${BASE_URL}/api/v1/press-table/delete-record`,{
-  //       order_id: matched?.order_id
-  //      });
-
-  //      if(deleteMatchedOrderid){
-  //        console.log("Matched record deleted sucessfully", matched);
-  //      }
-  //   } catch (error) {
-  //     console.log("Failed to delete:",error);
-  //   }
-
-  //  } catch (error) {
-  //   console.log("Failed to delete matched order id", error);
-  //  }
-
-  // }
-
-
   const fetchOrderIdAndDeleteRecordFromPressTable = async () => {
     try {
       const findOrderId = await axios.get(`${BASE_URL}/api/v1/press-table/get-records`);
@@ -189,38 +169,140 @@ const ProductsCopy = () => {
   };
 
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  // let newProduct=[];
+
+  //   if((ordersRecord?.style_number?.toString().startsWith("30") && ordersRecord?.style_number?.toString()?.length ===5 || formData?.styleNumber?.toString().startsWith("30") && formData?.styleNumber?.toString()?.length ===5)){
+
+  //       let style1  = {
+  //     styleNumber: matchedCoords?.style1,
+  //     size: formData.size.trim() || ordersRecord?.size,
+  //     quantity: parseInt(formData.quantity) || 0,
+  //     dateAdded: new Date().toISOString(),
+  //     // rackSpace: result?.rackSpace || "Not found",
+  //     rackSpace: matchedCoords ? matchedCoords.rackspace : result ? result.rackSpace : "Not found",
+  //     orderId: orderId || "_",
+  //   };
+  //    let style2  = {
+  //     styleNumber: matchedCoords?.style2,
+  //     size: formData.size.trim() || ordersRecord?.size,
+  //     quantity: parseInt(formData.quantity) || 0,
+  //     dateAdded: new Date().toISOString(),
+  //     // rackSpace: result?.rackSpace || "Not found",
+  //     rackSpace: matchedCoords ? matchedCoords.rackspace : result ? result.rackSpace : "Not found",
+  //     orderId: orderId || "_",
+  //   };
+  //     newProduct = [style1,style2];
+
+  //   }
+  //    newProduct = {
+  //     styleNumber: formData.styleNumber.trim() || ordersRecord?.style_number,
+  //     size: formData.size.trim() || ordersRecord?.size,
+  //     quantity: parseInt(formData.quantity) || 0,
+  //     dateAdded: new Date().toISOString(),
+  //     // rackSpace: result?.rackSpace || "Not found",
+  //     rackSpace: matchedCoords ? matchedCoords.rackspace : result ? result.rackSpace : "Not found",
+  //     orderId: orderId || "N/A",
+  //   };
+
+  //   let updatedProducts;
+  //   if (editingIndex !== null) {
+  //     // Update existing product
+  //     updatedProducts = [...products];
+  //     updatedProducts[editingIndex] = newProduct;
+  //     setEditingIndex(null); // Reset editing state
+  //   } else {
+  //     // Add new product
+  //     updatedProducts = [newProduct, ...products];
+  //   }
+
+  //   localStorage.setItem("products", JSON.stringify(updatedProducts));
+  //   setProducts(updatedProducts);
+
+
+  //   fetchOrderIdAndDeleteRecordFromPressTable();
+
+
+  //   setFormData({ styleNumber: "", size: "", quantity: 1 });
+
+  //   styleNumberRef.current.focus();
+  // };
+
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const newProduct = {
-      styleNumber: formData.styleNumber.trim() || ordersRecord?.style_number,
-      size: formData.size.trim() || ordersRecord?.size,
-      quantity: parseInt(formData.quantity) || 0,
-      dateAdded: new Date().toISOString(),
-      rackSpace: result?.rackSpace || "Not found",
-    };
+  e.preventDefault();
 
-    let updatedProducts;
-    if (editingIndex !== null) {
-      // Update existing product
-      updatedProducts = [...products];
-      updatedProducts[editingIndex] = newProduct;
-      setEditingIndex(null); // Reset editing state
-    } else {
-      // Add new product
-      updatedProducts = [newProduct, ...products];
-    }
+  const baseStyleNumber =
+    formData?.styleNumber?.trim() || ordersRecord?.style_number;
 
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-    setProducts(updatedProducts);
+  const size =
+    formData?.size?.trim() || ordersRecord?.size;
 
+  const quantity = parseInt(formData.quantity) || 0;
 
-    fetchOrderIdAndDeleteRecordFromPressTable();
+  const rackSpace =
+    matchedCoords?.rackspace ||
+    result?.rackSpace ||
+    "Not found";
 
-
-    setFormData({ styleNumber: "", size: "", quantity: 1 });
-
-    styleNumberRef.current.focus();
+  const commonPayload = {
+    size,
+    quantity,
+    dateAdded: new Date().toISOString(),
+    rackSpace,
+    orderId: orderId || "-",
+    parentStyleNumber: matchedCoords ? matchedCoords.coordstyle : null,
   };
+
+  let newProducts = [];
+
+  /** CASE 1: Co-ords style → add both child styles */
+  const isCoordsStyle =
+    baseStyleNumber?.toString().startsWith("30") &&
+    baseStyleNumber?.toString().length === 5 &&
+    matchedCoords?.style1 &&
+    matchedCoords?.style2;
+
+  if (isCoordsStyle) {
+    newProducts = [
+      {
+        styleNumber: matchedCoords.style1,
+        ...commonPayload,
+      },
+      {
+        styleNumber: matchedCoords.style2,
+        ...commonPayload,
+      },
+    ];
+  } 
+  /** CASE 2: Normal single style */
+  else {
+    newProducts = [
+      {
+        styleNumber: baseStyleNumber,
+        ...commonPayload,
+      },
+    ];
+  }
+
+  let updatedProducts;
+
+  if (editingIndex !== null) {
+    updatedProducts = [...products];
+    updatedProducts.splice(editingIndex, 1, ...newProducts);
+    setEditingIndex(null);
+  } else {
+    updatedProducts = [...newProducts, ...products];
+  }
+
+  localStorage.setItem("products", JSON.stringify(updatedProducts));
+  setProducts(updatedProducts);
+
+  fetchOrderIdAndDeleteRecordFromPressTable();
+
+  setFormData({ styleNumber: "", size: "", quantity: 1 });
+  styleNumberRef.current.focus();
+};
 
   const handleEdit = (index) => {
     const productToEdit = products[index];
@@ -262,42 +344,13 @@ const ProductsCopy = () => {
 
   const qrIdRef = useRef(null);
 
-  // ****************************// before 26-07-2025 code ************************
-
-  // 1. Fetch data when orderId is scanned
-  // useEffect(() => {
-  //   const autoFetch = async () => {
-  //     if (orderId?.length === 5) {
-  //       try {
-  //         const response = await getResponseFromOrders(Number(orderId));
-  //         styleNumberRef.current.focus();
-  //         styleNumberRef.current.select();
-  //         setOrdersRecord(response); // Triggers the second effect
-  //         // setOrderId("");
-  //       } catch (error) {
-  //         console.error("Failed to fetch or process order", error);
-  //       }
-  //     }
-  //   };
-
-  //   autoFetch();
-  // }, [orderId]);
-
-  // const scanAndAddProduct = (e) => {
-  //   e.preventDefault();
-  //   handleSubmit({ preventDefault: () => { } }); // Mimic a form submit
-  //   // fetchOrderIdAndDeleteRecordFromPressTable();
-  //   setOrdersRecord({});
-  //   setOrderId("");
-  //   qrIdRef.current.focus();
-
-  // }
+ 
 
   // ****************************// after 26-07-2025 code ************************
 
   useEffect(() => {
     const autoFetch = async () => {
-      if (orderId?.length >= 5) {
+      if (orderId?.length === 5 || orderId?.length === 6) {
         try {
           const response = await getResponseFromOrders(Number(orderId));
           styleNumberRef.current.focus();
@@ -325,6 +378,9 @@ const ProductsCopy = () => {
     qrIdRef.current.focus();
   };
 
+  
+
+ 
 
   // 2. Auto-submit when ordersRecord is updated with valid data
   // useEffect(() => {
@@ -335,10 +391,8 @@ const ProductsCopy = () => {
   //     qrIdRef.current.focus();
   //   }
   // }, [ordersRecord]);
-
   return (
     <div className="max-w-4xl p-6 bg-white rounded-lg">
-
       <Session
         products={products}
         setProducts={setProducts}
@@ -398,10 +452,10 @@ const ProductsCopy = () => {
           <div className="flex-1">
             <div className="flex justify-end">
               <span
-                className={`${result?.rackSpace ? "block" : "hidden"
+                className={`${(result?.rackSpace || matchedCoords?.rackspace ) ? "block" : "hidden"
                   } bg-yellow-200 py-2 px-4 rounded-full mb-2 `}
               >
-                Rack Space: {result ? result.rackSpace : "Not found"}
+                Rack Space:  {matchedCoords ? matchedCoords.rackspace : result ? result.rackSpace : "Not found"}
               </span>
             </div>
             <label
@@ -428,6 +482,17 @@ const ProductsCopy = () => {
               placeholder="Style #"
             />
           </div>
+            {/* ********************* coords split logics ************************ */}
+        {(ordersRecord?.style_number?.toString().startsWith("30") && ordersRecord?.style_number?.toString()?.length ===5 || formData?.styleNumber?.toString().startsWith("30") && formData?.styleNumber?.toString()?.length ===5) && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+           <div className="grid grid-cols-2 gap-1">
+            <p>Style 1 : {matchedCoords.style1}</p>
+            <p>Rack Space : {matchedCoords.rackspace}</p>
+            <p>Style 2 : {matchedCoords.style2}</p>
+            <p>Rack Space : {matchedCoords.rackspace}</p>
+           </div>
+          </div>
+        )}
 
           <Select
             ref={sizeRef}
@@ -471,6 +536,8 @@ const ProductsCopy = () => {
               }),
             }}
           />
+
+      
 
           {/* Quantity */}
           <div className="flex-1 ">
@@ -526,6 +593,7 @@ const ProductsCopy = () => {
                 className={`flex items-center gap-4 p-3 rounded-md hover:bg-gray-100 transition-colors ${editingIndex === index ? "bg-blue-50" : "bg-gray-50"
                   }`}
               >
+                <div className="flex-1 font-medium">{product.orderId}</div>
                 <div className="flex-1 font-medium">{product.styleNumber}</div>
                 <div className="flex-1">{product.size}</div>
                 <div className="flex-1">{product.quantity}</div>

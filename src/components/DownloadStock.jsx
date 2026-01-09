@@ -1,4 +1,4 @@
-const downloadStock = (data) => {
+const downloadStock = (data,googleSheetColors) => {
     
     try {
       // 1. Get products from localStorage
@@ -15,11 +15,12 @@ const downloadStock = (data) => {
       
       // 3. Process ALL products into CSV rows
       const csvRows = products.map(product => {
-        const matched = data?.find((p)=>p.style_code==product.styleNumber);
+        // const matched = data?.find((p)=>p.style_code==product.styleNumber);
+        const matched = googleSheetColors?.find((p)=>p.stylenumber==product.styleNumber);
         // Ensure all required fields exist with fallbacks
         return [
           '22784', // DropshipWarehouseId
-          `${product.styleNumber}-${matched?.color || ""}-${product.size}` || 'MISSING_SKU', // Item SkuCode
+          `${product.styleNumber}-${matched?.styleprimarycolor || ""}-${product.size}` || 'MISSING_SKU', // Item SkuCode
           'ADD', // InventoryAction
           '', // QtyIncludesBlocked (empty)
           product.quantity || 0, // Qty

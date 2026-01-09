@@ -30,10 +30,10 @@ const BarcodeGenerator = () => {
         const cols = line.split(",");
         if (cols.length < 4) return null;
         return {
-          sku: cols[0]?.trim(),
-          color: cols[2]?.trim(),
-          rackSpace: cols[1]?.trim(),
-          quantity: parseInt(cols[3]) || 1,
+          sku: cols[1]?.trim(),
+          color: cols[3]?.trim(),
+          rackSpace: cols[2]?.trim(),
+          quantity: parseInt(cols[4]) || 1,
         };
       })
       .filter(p => p && p.sku);
@@ -74,7 +74,7 @@ const BarcodeGenerator = () => {
     ctx.fillStyle = "black";
     ctx.font = "60px Arial";
     ctx.textAlign = "center";
-    const label = `${product.rackSpace} ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]}`;
+    const label = `${product.rackSpace} ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]}${product.sku.split("-")[2] !=="null" ? `-(${product.sku.split("-")[2]})` : ""}`;
     ctx.fillText(label, widthPx / 2, heightPx - 150);
   
     return canvas.toDataURL("image/png");
