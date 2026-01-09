@@ -46,7 +46,9 @@
 //         alert("Failed to generate inventory file!");
 //       }
 // } 
+// ************************ test ******************************
 
+let demo = "hello";
 const downloadBarcodes = (data, googleSheetColors) => {
   try {
     const products = JSON.parse(localStorage.getItem("products")) || [];
@@ -58,63 +60,57 @@ const downloadBarcodes = (data, googleSheetColors) => {
 
     const headers = "OrderId,Barcode,Title,Label Type,Qty\n";
 
-    /** STEP 1: Group by parentStyleNumber */
-    const parentMap = {};
-
-    products.forEach((product) => {
-      if (!parentMap[product.parentStyleNumber]) {
-        parentMap[product.parentStyleNumber] = [];
-      }
-      parentMap[product.parentStyleNumber].push(product);
-    });
-
     const rows = [];
 
-    /** STEP 2: Parent → Size logic */
-    Object.entries(parentMap).forEach(([parentStyle, items]) => {
-      const sizeMap = {};
+    for (let i = 0; i < products.length; i++) {
+      const current = products[i];
 
-      items.forEach((item) => {
-        if (!sizeMap[item.size]) {
-          sizeMap[item.size] = [];
+      // 🔹 Get color from googleSheetColors
+      const matched = googleSheetColors?.find(
+        (p) => p.stylenumber == current.styleNumber
+      );
+      const color = matched?.styleprimarycolor || "NA";
+
+      // 🔹 Check next product for combo (consecutive same size & parentStyle)
+      const next = products[i + 1];
+      const isNextCombo =
+        next &&
+        next.parentStyleNumber === current.parentStyleNumber &&
+        next.size === current.size;
+
+      if (isNextCombo) {
+        // ✅ Combo barcode (only if consecutive)
+        rows.push([
+          "-", 
+          `${current.parentStyleNumber}-${current.size}`, 
+          current.rackSpace,
+          color,
+          current.quantity,
+        ]);
+
+        // skip the next consecutive products that match
+        let j = i + 1;
+        while (
+          j < products.length &&
+          products[j].parentStyleNumber === current.parentStyleNumber &&
+          products[j].size === current.size
+        ) {
+          j++;
         }
-        sizeMap[item.size].push(item);
-      });
+        i = j - 1; // move index to last combo product
+      } else {
+        // ✅ Single child barcode
+        rows.push([
+          current.orderId,
+          `${current.styleNumber}-${current.size}-${current.parentStyleNumber}`,
+          current.rackSpace,
+          color,
+          current.quantity,
+        ]);
+      }
+    }
 
-      Object.entries(sizeMap).forEach(([size, sizeItems]) => {
-        // 🔥 COLOR (same as your working logic)
-        const matched = googleSheetColors?.find(
-          (p) => p.stylenumber == sizeItems[0].styleNumber
-        );
-
-        const color = matched?.styleprimarycolor || "NA";
-
-        /** ✅ COMBO CASE */
-        if (sizeItems.length > 1) {
-          rows.push([
-            "-",
-            `${parentStyle}-${size}`,
-            sizeItems[0]?.rackSpace,
-            color,
-            sizeItems.reduce((sum, i) => sum + (i.quantity || 0), 0),
-            
-          ]);
-        }
-        /** ✅ SINGLE CHILD CASE */
-        else {
-          const item = sizeItems[0];
-          rows.push([
-            `${item.orderId}`,
-            `${item.styleNumber}-${size}-${parentStyle}`,
-            item?.rackSpace,
-            color,
-            item.quantity,
-          ]);
-        }
-      });
-    });
-
-    /** STEP 3: CSV generate */
+    // ✅ CSV generate
     const csvContent = headers + rows.map(r => r.join(",")).join("\n");
 
     const blob = new Blob([csvContent], {
@@ -131,6 +127,8 @@ const downloadBarcodes = (data, googleSheetColors) => {
     alert("Failed to generate inventory file!");
   }
 };
+
+
 
 
 

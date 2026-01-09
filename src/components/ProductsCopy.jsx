@@ -544,7 +544,7 @@ const coordsArticleTypeMatch = (styleNumber)=>{
                 maxHeight: "none",
               }),
             }}
-          />
+          />  
 
       
 
