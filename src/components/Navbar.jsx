@@ -90,7 +90,7 @@ const Navbar = () => {
         </button>
 
         <button
-        onClick={()=>downloadBarcodes(productsData)}
+        onClick={()=>downloadBarcodes(productsData,googleSheetColors)}
         className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-all duration-200 text-gray-300 hover:text-white group">
           <FaBarcode className="text-purple-400 group-hover:text-purple-300" />
           <span>Barcodes</span>
@@ -98,11 +98,6 @@ const Navbar = () => {
         </button>
 
         </div>
-
-      
-       
-       
-
       </div>
 
       {/* Bottom Action Button */}

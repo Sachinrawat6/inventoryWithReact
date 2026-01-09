@@ -1,4 +1,4 @@
-const downloadBarcodes = (data)=>{
+const downloadBarcodes = (data,googleSheetColors)=>{
     
     try {
         // 1. Get products from localStorage
@@ -15,15 +15,16 @@ const downloadBarcodes = (data)=>{
         
         // 3. Process ALL products into CSV rows
         const csvRows = products.map(product => {
-          const matched = data?.find((p)=>p.style_code==product.styleNumber);
-          
+          // const matched = data?.find((p)=>p.style_code==product.styleNumber);
+          const matched = googleSheetColors?.find((p)=>p.stylenumber==product.styleNumber);
+          console.log("barcode colors",matched)
           // Ensure all required fields exist with fallbacks
           return [
             `${product.orderId}`,
             `${product.styleNumber}-${product.size}-${product.parentStyleNumber}`,
             // `(${matched?.rack_space==="" || matched?.rack_space.toLowerCase()==="default"  ?product?.rackSpace:matched?.rack_space}) `,
             product?.rackSpace,
-            `${matched?.color}`,
+            `${matched?.styleprimarycolor}`,
             product?.quantity
           ].join(',');
         });
