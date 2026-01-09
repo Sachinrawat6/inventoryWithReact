@@ -9,7 +9,7 @@ const BASE_URL = "https://return-inventory-backend.onrender.com";
 const ProductsCopy = () => {
   const productsData = useGlobalContext();
   const [sessionStart, setSessionStart] = useState(false);
-  const { getResponseFromOrders,coordsData } = useGlobalContext();
+  const { getResponseFromOrders,coordsData ,googleSheetColors } = useGlobalContext();
   const [ordersRecord, setOrdersRecord] = useState([]);
   const [sessionId, setSessionId] = useState(
     localStorage.getItem("sessionId") || null
@@ -36,6 +36,12 @@ const ProductsCopy = () => {
   || (co.coordstyle === Number(formData.styleNumber) || co.coordstyle === Number(ordersRecord?.style_number))
 );
 
+
+// *************** coords article type matching logics ***********************
+const coordsArticleTypeMatch = (styleNumber)=>{
+ return googleSheetColors.find((d)=>d.stylenumber== styleNumber)?.styletype
+}
+  
 
   if(matchedCoords){    console.log("Matched Coords Data",matchedCoords);
   }
@@ -485,11 +491,13 @@ const ProductsCopy = () => {
             {/* ********************* coords split logics ************************ */}
         {(ordersRecord?.style_number?.toString().startsWith("30") && ordersRecord?.style_number?.toString()?.length ===5 || formData?.styleNumber?.toString().startsWith("30") && formData?.styleNumber?.toString()?.length ===5) && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
-           <div className="grid grid-cols-2 gap-1">
+           <div className="grid grid-cols-3 gap-1">
             <p>Style 1 : {matchedCoords.style1}</p>
             <p>Rack Space : {matchedCoords.rackspace}</p>
+            <p>Article Type : {coordsArticleTypeMatch(matchedCoords?.style1)}</p>
             <p>Style 2 : {matchedCoords.style2}</p>
             <p>Rack Space : {matchedCoords.rackspace}</p>
+            <p>Article Type : {coordsArticleTypeMatch(matchedCoords?.style2)}</p>
            </div>
           </div>
         )}
