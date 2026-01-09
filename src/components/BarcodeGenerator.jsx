@@ -74,52 +74,107 @@ const BarcodeGenerator = () => {
     ctx.fillStyle = "black";
     ctx.font = "60px Arial";
     ctx.textAlign = "center";
-    const label = `${product.rackSpace} ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]}${product.sku.split("-")[2] !=="null" ? `-(${product.sku.split("-")[2]})` : ""}`;
+    const label = `${product.rackSpace} ${product.sku.split("-")[0]}-${product.color}-${product.sku.split("-")[1]}${ (product.sku.split("-")[2] !=="null") && (product.sku.split("-")[2]?.startsWith("30") &&  product.quantity<2 ) ? `-(${product.sku.split("-")[2]})` : ""}`;
     ctx.fillText(label, widthPx / 2, heightPx - 150);
   
     return canvas.toDataURL("image/png");
   };
   
+  // const exportToPDF = async () => {
+  //   if (products.length === 0) return;
+
+  //   try {
+  //     setIsGenerating(true);
+  //     const pdf = new jsPDF({
+  //       orientation: "landscape",
+  //       unit: "mm",
+  //       format: [100, 50],
+  //     });
+
+  //     const cache = {};
+
+  //     for (const product of products) {
+  //       const key = `${product.sku}_${product.name}_${product.rackSpace}`;
+  //       if (!cache[key]) {
+  //         cache[key] = await createBarcodeImage(product);
+  //       }
+        
+  //       for (let i = 0; i < product.quantity; i++) {
+  //         if (!(product === products[0] && i === 0)) {
+  //           if(product.sku?.split("-")[0]?.startsWith("30")  && product.quantity<3){
+  //             // pdf.addPage([100, 50], "landscape");
+  //             continue; // Skip adding new page for certain SKUs
+  //           }
+  //           pdf.addPage([100, 50], "landscape");
+  //         }
+  //         pdf.addImage(cache[key], "PNG", 0, 0, 100, 50);
+
+  //         if (i % 20 === 0) {
+  //           // Delay every 20 renders to allow UI breathing room
+  //           await new Promise((res) => setTimeout(res, 10));
+  //         }
+  //       }
+  //     }
+
+  //     pdf.save(`barcodes_${new Date().toISOString().slice(0, 10)}.pdf`);
+  //   } catch (err) {
+  //     console.error("Export error:", err);
+  //     alert("PDF export failed.");
+  //   } finally {
+  //     setIsGenerating(false);
+  //   }
+  // };
+
   const exportToPDF = async () => {
-    if (products.length === 0) return;
+  if (products.length === 0) return;
 
-    try {
-      setIsGenerating(true);
-      const pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: [100, 50],
-      });
+  try {
+    setIsGenerating(true);
 
-      const cache = {};
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: [100, 50],
+    });
 
-      for (const product of products) {
-        const key = `${product.sku}_${product.name}_${product.rackSpace}`;
-        if (!cache[key]) {
-          cache[key] = await createBarcodeImage(product);
-        }
+    const cache = {};
 
-        for (let i = 0; i < product.quantity; i++) {
-          if (!(product === products[0] && i === 0)) {
-            pdf.addPage([100, 50], "landscape");
-          }
-          pdf.addImage(cache[key], "PNG", 0, 0, 100, 50);
+    let isFirstPage = true;
 
-          if (i % 20 === 0) {
-            // Delay every 20 renders to allow UI breathing room
-            await new Promise((res) => setTimeout(res, 10));
-          }
-        }
+    for (const product of products) {
+      const key = `${product.sku}_${product.name}_${product.rackSpace}`;
+
+      if (!cache[key]) {
+        cache[key] = await createBarcodeImage(product);
       }
 
-      pdf.save(`barcodes_${new Date().toISOString().slice(0, 10)}.pdf`);
-    } catch (err) {
-      console.error("Export error:", err);
-      alert("PDF export failed.");
-    } finally {
-      setIsGenerating(false);
+      const isComboStyle = product.sku?.split("-")[0]?.startsWith("30");
+
+      // 🔥 Combo → only ONE barcode
+      const pagesToPrint = isComboStyle ? 1 : product.quantity;
+
+      for (let i = 0; i < pagesToPrint; i++) {
+        if (!isFirstPage) {
+          pdf.addPage([100, 50], "landscape");
+        }
+
+        pdf.addImage(cache[key], "PNG", 0, 0, 100, 50);
+        isFirstPage = false;
+
+        if (i % 20 === 0) {
+          await new Promise((res) => setTimeout(res, 10));
+        }
+      }
     }
-  };
+
+    pdf.save(`barcodes_${new Date().toISOString().slice(0, 10)}.pdf`);
+  } catch (err) {
+    console.error("Export error:", err);
+    alert("PDF export failed.");
+  } finally {
+    setIsGenerating(false);
+  }
+};
 
   const generatePreview = async () => {
     if (products.length === 0) return alert("No products to preview!");

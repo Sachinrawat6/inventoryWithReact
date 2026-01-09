@@ -491,7 +491,7 @@ const coordsArticleTypeMatch = (styleNumber)=>{
             {/* ********************* coords split logics ************************ */}
         {(ordersRecord?.style_number?.toString().startsWith("30") && ordersRecord?.style_number?.toString()?.length ===5 || formData?.styleNumber?.toString().startsWith("30") && formData?.styleNumber?.toString()?.length ===5) && (
           <div className="mt-2 p-4 bg-blue-50 border border-blue-200 rounded">
-            <div> <input type="checkbox" name="" id="" /> </div>
+            {/* <div> <input type="checkbox" name="" id="" /> </div> */}
            <div className="grid grid-cols-3 gap-1">
             <p>Style 1 : {matchedCoords.style1}</p>
             <p>Rack Space : {matchedCoords.rackspace}</p>
