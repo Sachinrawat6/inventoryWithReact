@@ -76,8 +76,7 @@ const downloadBarcodes = (data, googleSheetColors) => {
       const isNextCombo =
         next &&
         next.parentStyleNumber === current.parentStyleNumber &&
-        next.size === current.size;
-
+        next.size === current.size && next.parentStyleNumber?.toString().startsWith("30");
       if (isNextCombo) {
         // ✅ Combo barcode (only if consecutive)
         rows.push([
