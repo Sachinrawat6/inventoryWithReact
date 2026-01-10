@@ -268,15 +268,18 @@ import { jsPDF } from "jspdf";
 import JsBarcode from "jsbarcode";
 import html2canvas from "html2canvas";
 import { FaBarcode } from "react-icons/fa";
-
+import axios from "axios";
 const BarcodeGenerator = () => {
   const [products, setProducts] = useState([]);
+  const[orderIds,setOrderIds]=useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [progress, setProgress] = useState({ current: 0, total: 0, percentage: 0 });
   const [generationStage, setGenerationStage] = useState("");
   const previewRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const MAPPING_BASE_URL = "https://raw-material-backend.onrender.com/api/v1/order-id-mapping";
+
 
   // Progress bar component
   const ProgressBar = () => (
@@ -319,9 +322,12 @@ const BarcodeGenerator = () => {
           color: cols[3]?.trim(),
           rackSpace: cols[2]?.trim(),
           quantity: parseInt(cols[4]) || 1,
+          orderId: cols[0]?.trim() || "",
         };
       })
       .filter(p => p && p.sku);
+      let orderIdsList = parsed.filter(item=>item.orderId !=="-");
+      setOrderIds(orderIdsList);
 
     setProducts(parsed);
     setPreviewUrl("");
@@ -423,6 +429,7 @@ const BarcodeGenerator = () => {
 
   const exportToPDF = async () => {
     if (products.length === 0) return;
+
     
     // Create abort controller for cancellation
     abortControllerRef.current = new AbortController();
@@ -572,6 +579,30 @@ const BarcodeGenerator = () => {
     };
   }, []);
 
+
+ const upsertRackSpaceMapping = async () => {
+         try {
+          const payload = orderIds.map(item=>({
+            order_id: item.orderId,
+            style_number: item.sku.split,
+            size: item.sku.split("-")[1],
+            rack_space: item.rackSpace?.split("*")[0] || "",
+            color: item.color || "",
+          }));
+          console.log("payload",payload)
+             const response = await axios.post(
+                `${MAPPING_BASE_URL}/upsertRackSpace`,
+                payload
+            );
+              console.log("Upsert rack space response", response.data);
+         } catch (error) {
+          console.log("Failed to upsert rack details", error);
+         }
+          }
+     
+    
+
+
   if(isGenerating){
     return (
       <div className="container mx-auto p-6 max-w-4xl">
@@ -600,6 +631,11 @@ const BarcodeGenerator = () => {
       </div>
     );
   }
+
+
+
+  console.log("uploaded barcode data",products)
+  console.log("order ids",orderIds)
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -638,7 +674,12 @@ const BarcodeGenerator = () => {
                 Preview Sample
               </button>
               <button
-                onClick={exportToPDF}
+                onClick={
+                  ()=>{
+                    exportToPDF();
+                    upsertRackSpaceMapping();
+                  }
+                }
                 disabled={isGenerating}
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
               >
