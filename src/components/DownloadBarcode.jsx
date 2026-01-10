@@ -102,8 +102,8 @@ const downloadBarcodes = (data, googleSheetColors) => {
         // ✅ Single child barcode
         rows.push([
           current.orderId,
-          `${current.styleNumber}-${current.size}-${current.parentStyleNumber}`,
-          current.rackSpace,
+          `${current.styleNumber}-${current.size}`,
+          `${current.rackSpace}*${current.parentStyleNumber}`,
           color,
           current.quantity,
         ]);
